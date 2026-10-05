@@ -169,22 +169,21 @@ section{scroll-margin-top:84px}
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
 @media(min-width:641px){ .grid{grid-template-columns:repeat(3,1fr);gap:16px} }
 @media(min-width:901px){ .grid{grid-template-columns:repeat(4,1fr);gap:18px} }
-/* Best Sellers: desktop = grid biasa; mobile = rel skrol mendatar bersnap */
-.grid-rail{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
-@media(max-width:640px){
-  .grid-rail{
-    display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;
-    margin:0 -20px;padding:2px 20px 8px;
-    scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;
-  }
-  .grid-rail::-webkit-scrollbar{display:none}
-  /* 78vw menghasilkan potongan ~1.35 kad = isyarat "boleh skrol" */
-  .grid-rail > .card{flex:0 0 78vw;max-width:280px;scroll-snap-align:start}
+
+/* Modifier section — kedua-dua container KEKAL .grid, jadi semua rule
+   ".grid .card" di bawah tetap terpakai dan All Products tidak tersentuh.
+   Di sini hanya bilangan lajur yang dibezakan. */
+/* .grid-best  → ikut .grid sepenuhnya: 2 / 3 / 4 lajur (maks 4 produk) */
+@media(min-width:901px){
+  /* Pakej Paling Berbaloi ambil maks 3 produk → hadkan 3 lajur supaya tiada slot kosong */
+  .grid-value{grid-template-columns:repeat(3,1fr)}
 }
+
+/* Base product card — dikongsi oleh Best Sellers, Pakej Paling Berbaloi & Semua Produk */
 .card{
   background:var(--card);border:1.5px solid var(--line);border-radius:22px;overflow:hidden;
-  display:flex;flex-direction:column;position:relative;text-align:left;width:100%;
-  cursor:pointer;transition:border-color .25s, transform .25s;
+  display:flex;flex-direction:column;position:relative;
+  transition:border-color .25s, transform .25s;
 }
 .card:hover{border-color:var(--lilac);transform:translateY(-3px)}
 .card .shot{aspect-ratio:3/4;background:var(--cream);display:grid;place-items:center;padding:16px;overflow:hidden}
@@ -204,7 +203,8 @@ section{scroll-margin-top:84px}
 .go{width:32px;height:32px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;
   background:var(--blush);color:#fff;font-size:.9rem;transition:background .2s}
 .card:hover .go{background:var(--blush-deep)}
-/* ---- All Products: kad padat pada mobile (TIDAK menyentuh .grid-rail / .grid-value) ---- */
+
+/* ---- Kad padat pada mobile — dipakai oleh Best Sellers, Pakej Paling Berbaloi & Semua Produk ---- */
 @media(max-width:640px){
   .grid .card{border-radius:18px}
   .grid .card .shot{padding:10px}
@@ -228,17 +228,31 @@ section{scroll-margin-top:84px}
 .badge-pop{background:var(--blush);color:#fff}
 .badge-val{background:var(--cream);color:var(--ink);border:1.5px solid var(--line)}
 
-/* best value: 2-3 kad, cream */
-/* maksimum 2 lajur: 3 kad melintang bersebelahan jadi terlalu sempit */
-.grid-value{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:18px;
-  max-width:900px}
-.grid-value .card{flex-direction:row;background:#fff}   /* putih supaya timbul dari jalur cream */
-.grid-value .card .shot{aspect-ratio:auto;width:40%;flex:0 0 40%;background:var(--cream);padding:14px}
-.grid-value .card .body{flex:1}
-.grid-value .card .desc{-webkit-line-clamp:3}
-@media(max-width:560px){
-  .grid-value .card{flex-direction:column}
-  .grid-value .card .shot{width:100%;flex:none;aspect-ratio:3/4}
+/* ---------- SPOTLIGHT (banner V1 — satu banner, tiada carousel) ---------- */
+.spot{
+  display:block;background:var(--card);border:1.5px solid var(--line);border-radius:22px;
+  overflow:hidden;transition:border-color .25s, transform .25s;
+}
+.spot:hover{border-color:var(--lilac);transform:translateY(-3px)}
+/* Imej ialah elemen utama. object-fit:contain supaya artwork/tulisan poster
+   tidak terpotong; latar cream mengisi ruang lebihan. */
+.spot-img{
+  display:block;width:100%;aspect-ratio:16/6;object-fit:contain;
+  background:var(--cream);
+}
+.spot-body{padding:16px 20px 18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.spot-txt{flex:1;min-width:180px}
+.spot-txt h3{font-size:1.02rem;margin-bottom:3px;line-height:1.3}
+.spot-txt p{font-size:.84rem;color:var(--ink-soft);line-height:1.5}
+.spot-body .cta{flex:0 0 auto}
+/* banner tanpa teks: jangan tinggalkan padding kosong */
+.spot-body:empty{display:none}
+@media(max-width:640px){
+  .spot{border-radius:18px}
+  /* ratio lebih tinggi pada mobile supaya poster tidak jadi jalur terlalu nipis */
+  .spot-img{aspect-ratio:4/3}
+  .spot-body{padding:14px 16px 16px;gap:12px}
+  .spot-body .cta{width:100%}
 }
 
 /* ---------- STORES ---------- */
@@ -321,6 +335,22 @@ body.locked{overflow:hidden}
   transition:opacity .5s ease, transform .5s cubic-bezier(.2,.7,.2,1)}
 .rv.in{opacity:1;transform:none}
 
+/* ---------- modal: gallery + video ---------- */
+.pm-gal{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 16px}
+.pm-thumb{width:58px;height:58px;border-radius:12px;overflow:hidden;padding:0;
+  border:2px solid var(--line);background:var(--cream);cursor:pointer;transition:border-color .2s}
+.pm-thumb.on{border-color:var(--blush)}
+.pm-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.pm-video{margin:4px 0 16px;border-radius:14px;overflow:hidden;background:#000}
+.pm-video video{width:100%;max-height:52vh;display:block;background:#000}
+.pm-video iframe{width:100%;aspect-ratio:16/9;border:0;display:block}
+.pm-vlink{display:inline-block;padding:10px 18px;border-radius:100px;background:#fff;
+  border:1.5px solid var(--lilac);color:var(--ink);font-size:.86rem;font-weight:500}
+@media(max-width:640px){
+  .pm-thumb{width:50px;height:50px}
+  .pm-video video{max-height:40vh}
+}
+
 /* ---------- FOOTER ---------- */
 footer{margin-top:16px;padding:38px 0 48px;border-top:1px solid var(--line);text-align:center;background:var(--cream)}
 footer img{width:40px;height:40px;object-fit:contain;margin:0 auto 10px}
@@ -368,6 +398,17 @@ footer p{color:var(--ink-soft);font-size:.8rem}
 </section>
 
 <main>
+  <!-- ============ SPOTLIGHT NPRECIOUS ============ -->
+  <!-- Tersembunyi secara lalai; hanya dipaparkan jika ada banner is_active -->
+  <section class="sec hide" id="spotlight" style="padding-bottom:0">
+    <div class="wrap">
+      <div class="sec-head" style="margin-bottom:16px">
+        <span class="eyebrow">Spotlight</span>
+      </div>
+      <div id="spotBox"></div>
+    </div>
+  </section>
+
   <!-- ============ CARI MENGIKUT TAHAP ============ -->
   <section class="sec" id="tahap">
     <div class="wrap">
@@ -387,7 +428,7 @@ footer p{color:var(--ink-soft);font-size:.8rem}
         <span class="eyebrow">Paling Popular</span>
         <h2>Best Sellers</h2>
       </div>
-      <div class="grid-rail" id="bestGrid"></div>
+      <div class="grid grid-best" id="bestGrid"></div>
     </div>
   </section>
 
@@ -398,7 +439,7 @@ footer p{color:var(--ink-soft);font-size:.8rem}
         <span class="eyebrow">Nilai Terbaik</span>
         <h2>Pakej Paling Berbaloi</h2>
       </div>
-      <div class="grid-value" id="valueGrid"></div>
+      <div class="grid grid-value" id="valueGrid"></div>
     </div>
   </section>
 
@@ -472,6 +513,7 @@ footer p{color:var(--ink-soft);font-size:.8rem}
   /* ---------- state ---------- */
   var PRODUCTS = [];
   var STORES   = [];
+  var BANNER   = null;   // Spotlight V1: satu banner sahaja
   var view = { stage:'', cat:'', q:'' };
 
   var STAGE_LIST = ['2-5 tahun','Preschool','Darjah 1-3','Darjah 4-6','Tingkatan 1-5','Creator & Parents'];
@@ -541,6 +583,46 @@ footer p{color:var(--ink-soft);font-size:.8rem}
   /* ---------- PRODUCT DETAIL MODAL ---------- */
   var lastFocus=null;
 
+  function youtubeId(url){
+    var m=(url||'').match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
+    return m ? m[1] : null;
+  }
+
+  // gallery: thumbnail yang menukar gambar utama (tiada library)
+  function galleryHtml(list){
+    if(!list || list.length===0) return '';
+    return '<div class="pm-gal">'
+      + list.map(function(u,i){
+          // tiada thumbnail ditanda "on" ketika modal dibuka — gambar besar
+          // masih cover (image_url), jadi highlight hanya muncul selepas diklik
+          return '<button type="button" class="pm-thumb" data-src="'+esc(u)+'">'
+               + '<img src="'+esc(u)+'" alt="" loading="lazy"></button>';
+        }).join('')
+      + '</div>';
+  }
+
+  // video: hanya dimuat bila ditekan (preload=none / iframe lazy)
+  function videoHtml(p){
+    var url=(p.video_url||'').trim();
+    if(!url) return '';
+    // Jenis ditentukan daripada URL sahaja — tiada kebergantungan pada video_type.
+    var body;
+    var yid=youtubeId(url);
+    if(yid){
+      body='<iframe src="https://www.youtube.com/embed/'+esc(yid)+'" title="Video produk" '
+         + 'allow="accelerometer; clipboard-write; encrypted-media; picture-in-picture" '
+         + 'allowfullscreen loading="lazy"></iframe>';
+    }else if(/\.(mp4|webm|ogg)(\?|#|$)/i.test(url)){
+      body='<video controls playsinline preload="none"'
+         + (p.image_url ? ' poster="'+esc(p.image_url)+'"' : '')
+         + ' src="'+esc(url)+'"></video>';
+    }else{
+      body='<a class="pm-vlink" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" '
+         + 'onclick="openLink(event,this.href)">Tonton video &#8599;</a>';
+    }
+    return '<span class="pm-lab">Video produk</span><div class="pm-video">'+body+'</div>';
+  }
+
   function openProduct(id){
     var p=PRODUCTS.filter(function(x){ return String(x.id)===String(id); })[0];
     if(!p) return;
@@ -582,6 +664,8 @@ footer p{color:var(--ink-soft);font-size:.8rem}
       +   '<h2 id="pmTitle">'+esc(p.name)+'</h2>'
       +   (p.description ? '<p class="pm-desc">'+esc(p.description)+'</p>' : '')
       +   (stages ? '<span class="pm-lab">Sesuai untuk</span><div class="pm-stages">'+stages+'</div>' : '')
+      +   galleryHtml(Array.isArray(p.gallery_images)?p.gallery_images:[])
+      +   videoHtml(p)
       +   '<div class="pm-price">'+priceBig+'</div>'
       +   buy
       + '</div>';
@@ -632,10 +716,10 @@ footer p{color:var(--ink-soft);font-size:.8rem}
   /* ---------- tahap: grid kad ---------- */
   function renderStageGrid(){
     var el=document.getElementById('stageGrid');
-    var avail={};
-    PRODUCTS.forEach(function(p){ (p.stages||[]).forEach(function(s){ avail[s]=true; }); });
-    var list=STAGE_LIST.filter(function(s){ return avail[s]; });
-    if(list.length===0){ document.getElementById('tahap').classList.add('hide'); return; }
+    // Keenam-enam tahap SENTIASA dipaparkan, walaupun DB belum mempunyai produk
+    // dengan nilai tersebut. (Dulu ditapis ikut data, jadi tahap baharu seperti
+    // "2-5 tahun" / "Darjah 1-3" / "Darjah 4-6" hilang dari UI.)
+    var list=STAGE_LIST;
     document.getElementById('tahap').classList.remove('hide');
     el.innerHTML=list.map(function(s){
       var ic=STAGE_ICON[s]||{e:'\u2b50',bg:'var(--cream)'};
@@ -727,6 +811,45 @@ footer p{color:var(--ink-soft);font-size:.8rem}
     reveal(el);
   }
 
+  /* ---------- SPOTLIGHT (V1: satu banner, tiada carousel) ---------- */
+  function renderSpotlight(){
+    var sec=document.getElementById('spotlight');
+    var box=document.getElementById('spotBox');
+    if(!sec || !box) return;
+
+    // tiada banner aktif → sembunyi seluruh section, tiada empty state
+    if(!BANNER){ sec.classList.add('hide'); box.innerHTML=''; return; }
+
+    var b=BANNER;
+    var img   = (b.image_url||'').trim();
+    var title = (b.title||'').trim();
+    var sub   = (b.subtitle||'').trim();
+    var link  = (b.button_link||'').trim();
+    var btn   = (b.button_text||'').trim() || 'Lihat Lagi';
+
+    // tiada imej DAN tiada teks → tiada apa nak papar
+    if(!img && !title && !sub){ sec.classList.add('hide'); box.innerHTML=''; return; }
+
+    var inner = (img ? '<img class="spot-img" src="'+esc(img)+'" alt="'+esc(title||'Spotlight')+'" loading="lazy">' : '')
+      + '<div class="spot-body">'
+      +   ((title||sub)
+            ? '<div class="spot-txt">'
+              + (title ? '<h3>'+esc(title)+'</h3>' : '')
+              + (sub   ? '<p>'+esc(sub)+'</p>'    : '')
+              + '</div>'
+            : '')
+      +   (link ? '<span class="cta">'+esc(btn)+'</span>' : '')
+      + '</div>';
+
+    // seluruh banner boleh diklik hanya jika ada link; jika tidak, kekal statik
+    box.innerHTML = link
+      ? '<a class="spot" href="'+esc(link)+'" target="_blank" rel="noopener noreferrer" '
+        + 'onclick="openLink(event,this.href)">'+inner+'</a>'
+      : '<div class="spot">'+inner+'</div>';
+
+    sec.classList.remove('hide');
+  }
+
   function renderStores(){
     var el=document.getElementById('storeGrid');
     var sec=document.getElementById('stores');
@@ -779,7 +902,7 @@ footer p{color:var(--ink-soft);font-size:.8rem}
   /* ---------- load ---------- */
   function showFatal(msg){
     document.getElementById('allGrid').innerHTML='<div class="state"><span class="em">\u26a0\ufe0f</span>'+esc(msg)+'</div>';
-    ['bestsellers','berbaloi','stores','tahap'].forEach(function(id){
+    ['bestsellers','berbaloi','stores','tahap','spotlight'].forEach(function(id){
       var s=document.getElementById(id); if(s) s.classList.add('hide');
     });
   }
@@ -797,8 +920,14 @@ footer p{color:var(--ink-soft);font-size:.8rem}
       .order('display_order',{ascending:true})
       .order('created_at',{ascending:true});
 
-    Promise.all([pProducts, pStores]).then(function(res){
-      var rp=res[0], rs=res[1];
+    var pBanners = sb.from('banners').select('*')
+      .eq('is_active', true)
+      .order('display_order',{ascending:true})
+      .order('created_at',{ascending:true})
+      .limit(1);
+
+    Promise.all([pProducts, pStores, pBanners]).then(function(res){
+      var rp=res[0], rs=res[1], rb=res[2];
 
       if(rp.error){ showFatal('Ralat memuatkan produk: '+rp.error.message); return; }
       PRODUCTS=(rp.data||[]).map(function(p){
@@ -807,6 +936,8 @@ footer p{color:var(--ink-soft);font-size:.8rem}
       });
 
       STORES = (rs && !rs.error && rs.data) ? rs.data : [];
+      // kegagalan banner TIDAK menghalang produk daripada dipaparkan
+      BANNER = (rb && !rb.error && rb.data && rb.data.length) ? rb.data[0] : null;
 
       if(PRODUCTS.length===0){
         document.getElementById('allGrid').innerHTML='<div class="state"><span class="em">\ud83d\udce6</span>Tiada produk aktif buat masa ini.</div>';
@@ -816,6 +947,7 @@ footer p{color:var(--ink-soft);font-size:.8rem}
       }else{
         renderEverything();
       }
+      renderSpotlight();
       renderStores();
     }).catch(function(err){
       showFatal('Ralat sambungan: '+(err && err.message ? err.message : err));
@@ -838,6 +970,17 @@ footer p{color:var(--ink-soft);font-size:.8rem}
       var c=e.target.closest('.card'); if(!c) return;
       e.preventDefault();
       openProduct(c.getAttribute('data-id'));
+    });
+  });
+
+  // klik thumbnail gallery → tukar gambar utama modal
+  document.getElementById('pmIn').addEventListener('click',function(e){
+    var b=e.target.closest('.pm-thumb'); if(!b) return;
+    var src=b.getAttribute('data-src'); if(!src) return;
+    var main=document.querySelector('.pm-img img');
+    if(main) main.src=src;
+    Array.prototype.forEach.call(document.querySelectorAll('.pm-thumb'),function(n){
+      n.classList.toggle('on', n===b);
     });
   });
 
