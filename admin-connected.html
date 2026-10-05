@@ -154,10 +154,32 @@ tbody tr:hover{background:rgba(245,55,154,.03)}
 .stg input{width:15px;height:15px;accent-color:var(--fuchsia);margin:0}
 .stg.on{border-color:var(--fuchsia);background:rgba(245,55,154,.06);color:var(--fuchsia)}
 .gem{font-size:.95rem;color:var(--violet)}
+.vbadge{display:inline-block;font-size:.6rem;font-weight:600;padding:2px 7px;border-radius:20px;
+  background:rgba(139,92,246,.12);color:var(--violet);vertical-align:middle;margin-left:4px}
 .gem.off{color:var(--line)}
 
 .legacy-note{margin-top:9px;padding:9px 12px;border-radius:10px;background:#FFF4D6;
   border:1px solid #F0D98A;color:#7A5A12;font-size:.76rem;line-height:1.45}
+
+/* ---------- media (gallery + video) ---------- */
+.hint{font-weight:400;color:var(--ink-soft);font-size:.72rem}
+.media-box{border:1.5px solid var(--line);border-radius:14px;padding:14px}
+.gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:9px;margin-bottom:10px}
+.gal-grid:empty{display:none}
+.gal-item{position:relative;aspect-ratio:1/1;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#f0eaf8}
+.gal-item img{width:100%;height:100%;object-fit:cover;display:block}
+.gal-item .rm{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;
+  background:rgba(0,0,0,.6);color:#fff;font-size:.7rem;display:grid;place-items:center;line-height:1}
+.gal-item .rm:hover{background:var(--danger)}
+.gal-item.up{display:grid;place-items:center;font-size:.68rem;color:var(--ink-soft)}
+.vtabs{display:flex;gap:6px;margin-bottom:10px}
+.vtab{flex:1;padding:8px 12px;border-radius:10px;border:1.5px solid var(--line);background:#fff;
+  font-size:.82rem;font-weight:600;color:var(--ink-soft);transition:.2s}
+.vtab.on{background:rgba(139,92,246,.1);border-color:var(--violet);color:var(--violet)}
+.vpreview{margin-top:10px;padding:10px;border-radius:10px;background:rgba(139,92,246,.05);font-size:.78rem;word-break:break-all}
+.vpreview video{width:100%;max-height:200px;border-radius:8px;display:block;margin-top:6px;background:#000}
+.vpreview iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:8px;margin-top:6px}
+.vpreview .vname{font-weight:600;color:var(--ink)}
 
 /* ---------- tabs ---------- */
 .tabs{display:flex;gap:8px;margin-bottom:18px}
@@ -214,6 +236,7 @@ tbody tr:hover{background:rgba(245,55,154,.03)}
     <div class="tabs">
       <button class="tab on" id="tabProducts" onclick="switchTab('products')">Produk</button>
       <button class="tab" id="tabStores" onclick="switchTab('stores')">Other Stores</button>
+      <button class="tab" id="tabSpot" onclick="switchTab('spotlight')">Spotlight Banner</button>
     </div>
 
     <div id="panelProducts">
@@ -276,6 +299,65 @@ tbody tr:hover{background:rgba(245,55,154,.03)}
         <div class="empty hide" id="stEmptyState">Belum ada store. Klik “＋ Tambah Store” untuk mula.</div>
       </div>
     </div><!-- /panelStores -->
+
+    <div id="panelSpot" class="hide">
+      <div class="tablecard" style="padding:22px">
+        <div class="bar" style="margin-bottom:18px">
+          <div class="stat">Status: <b id="spStatus">—</b></div>
+          <div class="spacer"></div>
+        </div>
+
+        <div class="field">
+          <label>Poster / Banner Image</label>
+          <div class="imgdrop">
+            <img id="sp_preview" class="hide" alt="preview">
+            <div class="ph" id="sp_ph">🖼️</div>
+            <div class="meta">
+              <button type="button" class="btn btn-soft btn-sm" onclick="document.getElementById('sp_file').click()">Pilih / Tukar Gambar</button>
+              <button type="button" class="btn btn-danger btn-sm hide" id="sp_rmBtn" onclick="removeBannerImage()">Buang Gambar</button>
+              <input type="file" id="sp_file" accept="image/*,.heic,.heif" class="hide" onchange="handleBannerFile(this)">
+              <div class="upStatus" id="sp_upStatus"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Title <span class="hint">(optional)</span></label>
+          <input type="text" id="sp_title" placeholder="cth: Promo Peperiksaan Akhir Tahun">
+        </div>
+
+        <div class="field">
+          <label>Subtitle <span class="hint">(optional)</span></label>
+          <input type="text" id="sp_subtitle" placeholder="cth: Diskaun sehingga 30% untuk semua worksheet">
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label>Button Text <span class="hint">(optional)</span></label>
+            <input type="text" id="sp_btnText" placeholder="Lihat Lagi">
+          </div>
+          <div class="field">
+            <label>Button Link <span class="hint">(optional)</span></label>
+            <input type="url" id="sp_btnLink" placeholder="https://…">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Tetapan</label>
+          <div class="toggles">
+            <label class="toggle" id="tSpotActive">
+              <input type="checkbox" id="sp_active" onchange="syncSpotToggle()">
+              <span class="t-txt"><b>Aktif</b><small>Papar Spotlight di katalog (jika tidak, section tersembunyi)</small></span>
+            </label>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">
+          <button type="button" class="btn btn-ghost" onclick="loadBanner()">Muat Semula</button>
+          <button type="button" class="btn btn-grad" id="spSaveBtn" onclick="saveBanner()">Simpan</button>
+        </div>
+      </div>
+    </div><!-- /panelSpot -->
   </div>
 </div>
 
@@ -345,6 +427,36 @@ tbody tr:hover{background:rgba(245,55,154,.03)}
           <label class="stg"><input type="checkbox" value="Creator & Parents"><span>Creator &amp; Parents</span></label>
         </div>
         <div class="legacy-note hide" id="legacyNote"></div>
+      </div>
+
+      <div class="field">
+        <label>Gallery Images <span class="hint">(optional · maks 5)</span></label>
+        <div class="media-box">
+          <div class="gal-grid" id="galGrid"></div>
+          <button class="btn btn-soft btn-sm" id="galAddBtn" onclick="document.getElementById('f_gallery').click()">＋ Tambah Gambar</button>
+          <input type="file" id="f_gallery" accept="image/*,.heic,.heif" multiple class="hide" onchange="handleGalleryFiles(this)">
+          <div class="upStatus" id="galStatus"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Video Produk <span class="hint">(optional)</span></label>
+        <div class="media-box">
+          <div class="vtabs">
+            <button type="button" class="vtab on" id="vtabUrl" onclick="setVideoType('url')">Link URL</button>
+            <button type="button" class="vtab" id="vtabUpload" onclick="setVideoType('upload')">Upload Fail</button>
+          </div>
+          <div id="vPaneUrl">
+            <input type="url" id="f_video_url" placeholder="https://youtube.com/… atau link .mp4" oninput="onVideoUrlInput()">
+          </div>
+          <div id="vPaneUpload" class="hide">
+            <button type="button" class="btn btn-soft btn-sm" onclick="document.getElementById('f_video_file').click()">Pilih Fail Video</button>
+            <input type="file" id="f_video_file" accept="video/*" class="hide" onchange="handleVideoFile(this)">
+          </div>
+          <div class="upStatus" id="vidStatus"></div>
+          <div class="vpreview hide" id="vPreview"></div>
+          <button type="button" class="btn btn-danger btn-sm hide" id="vClearBtn" onclick="clearVideo()">Buang Video</button>
+        </div>
       </div>
       <div class="field" style="margin-bottom:0">
         <label>Tetapan</label>
@@ -442,6 +554,7 @@ tbody tr:hover{background:rgba(245,55,154,.03)}
 const SUPABASE_URL      = "https://nmknlvmrcrkvojveueat.supabase.co";       // cth https://abcd.supabase.co
 const SUPABASE_ANON_KEY = "sb_publishable_d0-42j8ibGmc1VblSE5ZFg_D4wUnrE2";  // anon public key
 const BUCKET            = "product-images";
+const VIDEO_BUCKET      = "product-videos";
 /* ============================================================ */
 
 const configured = !SUPABASE_URL.startsWith("YOUR_") && !SUPABASE_ANON_KEY.startsWith("YOUR_");
@@ -552,7 +665,7 @@ function rowHtml(r, idx, total){
   return `
     <tr>
       <td><img class="thumb" src="${r.image_url||''}" onerror="this.style.visibility='hidden'" alt=""></td>
-      <td><div class="pname">${esc(r.name||'')}</div><div class="pcat">${esc(r.category||'')}</div></td>
+      <td><div class="pname">${esc(r.name||'')}${r.video_url?' <span class="vbadge">Video</span>':''}</div><div class="pcat">${esc(r.category||'')}${(Array.isArray(r.gallery_images)&&r.gallery_images.length)?' · '+r.gallery_images.length+' galeri':''}</div></td>
       <td class="hide-sm price">${fmtPrice(r)}</td>
       <td class="hide-sm"><span class="star ${r.is_popular?'':'off'}" title="Toggle Most Popular" style="cursor:pointer" onclick="togglePopular('${r.id}')">★</span> <span class="gem ${r.is_best_value?'':'off'}" title="Toggle Best Value" style="cursor:pointer" onclick="toggleBestValue('${r.id}')">◆</span></td>
       <td><span class="pill ${r.status==='active'?'pill-active':'pill-draft'}" style="cursor:pointer" onclick="toggleStatus('${r.id}')">${r.status==='active'?'● Active':'○ Draft'}</span></td>
@@ -593,7 +706,8 @@ async function toggleStatus(id){
 // tukar public URL → path dalam bucket.
 // Pulangkan null melainkan URL benar-benar datang daripada projek Supabase INI
 // dan bucket kita. Ini menghalang cleanup memadam sesuatu yang bukan milik kita.
-function pathFromPublicUrl(url){
+function pathFromPublicUrl(url, bucket){
+  const bkt = bucket || BUCKET;
   if(!url || typeof url!=='string') return null;
   let u, base;
   try{
@@ -601,7 +715,7 @@ function pathFromPublicUrl(url){
     base = new URL(SUPABASE_URL);
   }catch(e){ return null; }
   if(u.origin !== base.origin) return null;              // projek/host lain → jangan sentuh
-  const prefix='/storage/v1/object/public/'+BUCKET+'/';
+  const prefix='/storage/v1/object/public/'+bkt+'/';
   if(u.pathname.indexOf(prefix)!==0) return null;        // mesti bermula tepat dgn prefix
   let path;
   try{ path=decodeURIComponent(u.pathname.slice(prefix.length)); }catch(e){ return null; }
@@ -611,14 +725,15 @@ function pathFromPublicUrl(url){
 
 // padam fail SELEPAS DB berjaya — kalau terbalik, DB boleh tunjuk fail yang hilang
 // Kegagalan di sini TIDAK menggagalkan operasi utama; ia hanya beri amaran.
-async function deleteStorageFiles(urls){
+async function deleteStorageFiles(urls, bucket){
+  const bkt = bucket || BUCKET;
   const all=(urls||[]);
-  const paths=all.map(pathFromPublicUrl).filter(Boolean);
-  const skipped=all.filter(u=>u && !pathFromPublicUrl(u)).length;
+  const paths=all.map(u=>pathFromPublicUrl(u,bkt)).filter(Boolean);
+  const skipped=all.filter(u=>u && !pathFromPublicUrl(u,bkt)).length;
   if(skipped) console.warn('Cleanup dilangkau (bukan fail bucket kita):',skipped);
   if(paths.length===0) return true;
   try{
-    const { error }=await sb.storage.from(BUCKET).remove(paths);
+    const { error }=await sb.storage.from(bkt).remove(paths);
     if(error){
       console.warn('Cleanup storage gagal:',error.message);
       toast('Data disimpan, tetapi fail gambar lama gagal dibuang','bad');
@@ -721,6 +836,23 @@ function openModal(id){
   originalImageUrl = pendingImageUrl;   // rujukan selamat utk Cancel
   stagedUploads = [];
   modalSession++;                       // sebarang upload dari sesi lama kini tidak sah
+
+  // ---- media: gallery + video ----
+  galleryUrls   = r && Array.isArray(r.gallery_images) ? r.gallery_images.slice() : [];
+  originalGallery = galleryUrls.slice();
+  stagedGallery = [];
+  pendingVideoUrl  = r ? (r.video_url||'') : '';
+  originalVideoUrl = pendingVideoUrl;
+  // Tab dikesan daripada video_url sahaja (UI state, TIDAK disimpan ke DB).
+  // Fail dalam bucket video kita = upload; selainnya = link luar.
+  pendingVideoType = (pendingVideoUrl && pathFromPublicUrl(pendingVideoUrl, VIDEO_BUCKET)) ? 'upload' : 'url';
+  stagedVideo   = [];
+  videoUploading= false;
+  document.getElementById('f_video_url').value = (pendingVideoType==='url') ? pendingVideoUrl : '';
+  document.getElementById('vidStatus').textContent='';
+  document.getElementById('galStatus').textContent='';
+  renderGallery();
+  setVideoType(pendingVideoType);
   setPreview(pendingImageUrl);
   syncToggles();
   document.getElementById('modal').classList.add('show');
@@ -739,6 +871,16 @@ function closeModal(){
     stagedUploads=[];
     deleteStorageFiles(junk);   // fire-and-forget
   }
+  if(stagedGallery.length){
+    const junkG=stagedGallery.slice();
+    stagedGallery=[];
+    deleteStorageFiles(junkG);
+  }
+  if(stagedVideo.length){
+    const junkV=stagedVideo.slice();
+    stagedVideo=[];
+    deleteStorageFiles(junkV, VIDEO_BUCKET);
+  }
 }
 function setPreview(url){
   const img=document.getElementById('f_preview'), ph=document.getElementById('f_ph'), lbl=document.getElementById('f_urlLabel');
@@ -756,6 +898,197 @@ function syncCategory(){
     cust.classList.add('hide');
     cust.value=''; // bersihkan bila tukar balik ke kategori standard
   }
+}
+
+/* ============================================================
+   MEDIA: GALLERY + VIDEO
+   ============================================================ */
+const GAL_MAX        = 8;
+const VIDEO_MAX_MB   = 50;
+const IMG_MAX_MB     = 10;   // sebelum pemampatan; hasil akhir ~200–500KB
+
+let galleryUrls      = [];   // URL gambar gallery (committed + staged)
+let stagedGallery    = [];   // subset yg BELUM masuk DB
+let originalGallery  = [];   // gallery asal dari DB
+let originalVideoUrl = '';   // video asal dari DB
+let pendingVideoUrl  = "";
+let pendingVideoType = "url";
+let stagedVideo      = [];   // fail video yg BELUM masuk DB
+let videoUploading   = false;
+
+function fmtMB(b){ return (b/1024/1024).toFixed(1)+'MB'; }
+
+/* ---------- GALLERY ---------- */
+function renderGallery(){
+  const g=document.getElementById('galGrid');
+  if(!g) return;
+  g.innerHTML = galleryUrls.map((u,i)=>
+    `<div class="gal-item"><img src="${esc(u)}" alt="" onerror="this.style.opacity=.2">
+       <button type="button" class="rm" onclick="removeGalleryImage(${i})" aria-label="Buang">✕</button></div>`
+  ).join('');
+  const btn=document.getElementById('galAddBtn');
+  if(btn){
+    const full = galleryUrls.length>=GAL_MAX;
+    btn.disabled = full;
+    btn.textContent = full ? `Maksimum ${GAL_MAX} gambar` : '＋ Tambah Gambar';
+  }
+}
+
+async function removeGalleryImage(i){
+  const url=galleryUrls[i];
+  if(!url) return;
+  galleryUrls.splice(i,1);
+  // hanya buang fail jika ia staged (belum dalam DB). Yang sudah dalam DB
+  // dibuang selepas Save berjaya, supaya Cancel tidak merosakkan data.
+  const si=stagedGallery.indexOf(url);
+  if(si>-1){ stagedGallery.splice(si,1); await deleteStorageFiles([url]); }
+  renderGallery();
+}
+
+async function handleGalleryFiles(input){
+  const files=Array.from(input.files||[]);
+  input.value='';
+  if(files.length===0) return;
+  const mySession=modalSession;
+  const st=document.getElementById('galStatus');
+
+  const room=GAL_MAX-galleryUrls.length;
+  if(room<=0){ toast(`Maksimum ${GAL_MAX} gambar sahaja`,'bad'); return; }
+  const queue=files.slice(0,room);
+  if(files.length>room) toast(`Hanya ${room} gambar ditambah (maks ${GAL_MAX})`,'bad');
+
+  setUploading(true,'Memuat naik…');
+  let done=0;
+  for(const file of queue){
+    if(mySession!==modalSession) return;               // modal ditutup → henti
+    if(file.size > IMG_MAX_MB*1024*1024){
+      toast(`${file.name} terlalu besar (${fmtMB(file.size)}). Maksimum ${IMG_MAX_MB}MB.`,'bad');
+      continue;
+    }
+    st.textContent=`Memuat naik ${done+1}/${queue.length}…`;
+    let blob;
+    try{ blob = await compressImage(file); }
+    catch(e){ if(mySession!==modalSession) return; toast(e.message,'bad'); continue; }
+    if(mySession!==modalSession) return;
+
+    const ext=(blob===file ? (file.name.split('.').pop()||'jpg').toLowerCase() : 'jpg');
+    const path=`gal-${Date.now()}-${Math.random().toString(36).slice(2,7)}.${ext}`;
+    const { error }=await sb.storage.from(BUCKET).upload(path,blob,{cacheControl:'3600',upsert:false,contentType:blob.type||'image/jpeg'});
+    if(error){ if(mySession!==modalSession) return; toast('Gagal upload: '+error.message,'bad'); continue; }
+    const { data:{ publicUrl } }=sb.storage.from(BUCKET).getPublicUrl(path);
+    if(mySession!==modalSession){ deleteStorageFiles([publicUrl]); return; }  // basi → buang
+    galleryUrls.push(publicUrl);
+    stagedGallery.push(publicUrl);
+    done++;
+    renderGallery();
+  }
+  if(mySession!==modalSession) return;
+  setUploading(false);
+  st.textContent = done ? `${done} gambar ditambah ✓` : '';
+}
+
+/* ---------- VIDEO ---------- */
+function setVideoType(type){
+  pendingVideoType = (type==='upload') ? 'upload' : 'url';
+  document.getElementById('vtabUrl').classList.toggle('on', pendingVideoType==='url');
+  document.getElementById('vtabUpload').classList.toggle('on', pendingVideoType==='upload');
+  document.getElementById('vPaneUrl').classList.toggle('hide', pendingVideoType!=='url');
+  document.getElementById('vPaneUpload').classList.toggle('hide', pendingVideoType!=='upload');
+  renderVideoPreview();
+}
+
+function onVideoUrlInput(){
+  pendingVideoUrl = document.getElementById('f_video_url').value.trim();
+  pendingVideoType = 'url';
+  renderVideoPreview();
+}
+
+// kenal pasti YouTube → id, supaya boleh embed
+function youtubeId(url){
+  const m = (url||'').match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
+  return m ? m[1] : null;
+}
+
+function renderVideoPreview(){
+  const box=document.getElementById('vPreview');
+  const clr=document.getElementById('vClearBtn');
+  if(!box) return;
+  if(!pendingVideoUrl){ box.classList.add('hide'); box.innerHTML=''; clr.classList.add('hide'); return; }
+  clr.classList.remove('hide');
+  box.classList.remove('hide');
+  if(pendingVideoType==='upload'){
+    const name=pendingVideoUrl.split('/').pop();
+    box.innerHTML=`<div class="vname">${esc(decodeURIComponent(name))}</div>
+      <video controls preload="none" src="${esc(pendingVideoUrl)}"></video>`;
+    return;
+  }
+  const yid=youtubeId(pendingVideoUrl);
+  if(yid){
+    box.innerHTML=`<div class="vname">YouTube</div>
+      <iframe src="https://www.youtube.com/embed/${esc(yid)}" allowfullscreen loading="lazy"></iframe>`;
+  }else if(/\.(mp4|webm|ogg)(\?|$)/i.test(pendingVideoUrl)){
+    box.innerHTML=`<div class="vname">Video langsung</div>
+      <video controls preload="none" src="${esc(pendingVideoUrl)}"></video>`;
+  }else{
+    box.innerHTML=`<div class="vname">Link video</div><div>${esc(pendingVideoUrl)}</div>`;
+  }
+}
+
+async function clearVideo(){
+  // hanya buang fail jika ia staged; video dalam DB dibuang selepas Save
+  if(stagedVideo.length){
+    const junk=stagedVideo.slice(); stagedVideo=[];
+    await deleteStorageFiles(junk, VIDEO_BUCKET);
+  }
+  pendingVideoUrl='';
+  document.getElementById('f_video_url').value='';
+  document.getElementById('vidStatus').textContent='';
+  renderVideoPreview();
+}
+
+async function handleVideoFile(input){
+  const file=input.files&&input.files[0];
+  input.value='';
+  if(!file) return;
+  const mySession=modalSession;
+  const st=document.getElementById('vidStatus');
+
+  if(!/^video\//.test(file.type||'')){
+    toast('Sila pilih fail video (MP4 disyorkan).','bad'); return;
+  }
+  if(file.size > VIDEO_MAX_MB*1024*1024){
+    toast(`Video terlalu besar (${fmtMB(file.size)}). Maksimum ${VIDEO_MAX_MB}MB — sila pendekkan atau kecilkan ke 720p.`,'bad');
+    return;
+  }
+
+  videoUploading=true;
+  setUploading(true,'Memuat naik video…');
+  st.textContent=`Memuat naik video… (${fmtMB(file.size)})`;
+
+  const ext=(file.name.split('.').pop()||'mp4').toLowerCase();
+  const path=`vid-${Date.now()}-${Math.random().toString(36).slice(2,7)}.${ext}`;
+  const { error }=await sb.storage.from(VIDEO_BUCKET).upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type||'video/mp4'});
+  if(error){
+    videoUploading=false;
+    if(mySession!==modalSession) return;
+    setUploading(false);
+    st.textContent='Gagal upload: '+error.message;
+    return;
+  }
+  const { data:{ publicUrl } }=sb.storage.from(VIDEO_BUCKET).getPublicUrl(path);
+  videoUploading=false;
+  if(mySession!==modalSession){ deleteStorageFiles([publicUrl], VIDEO_BUCKET); return; }
+
+  if(stagedVideo.length){   // ganti video staged sebelum ini
+    const prev=stagedVideo.slice(); stagedVideo=[];
+    deleteStorageFiles(prev, VIDEO_BUCKET);
+  }
+  stagedVideo=[publicUrl];
+  pendingVideoUrl=publicUrl;
+  pendingVideoType='upload';
+  setUploading(false);
+  st.textContent='Video dimuat naik ✓';
+  renderVideoPreview();
 }
 
 /* ---------- STAGES (multi-select) ---------- */
@@ -957,7 +1290,7 @@ async function handleFile(input){
 
 /* ---------- SAVE ---------- */
 async function saveProduct(){
-  if(uploading){ toast('Tunggu gambar selesai dimuat naik…','bad'); return; }
+  if(uploading || videoUploading){ toast('Tunggu media selesai dimuat naik…','bad'); return; }
   const name=document.getElementById('f_name').value.trim();
   if(!name){ toast('Nama produk wajib diisi','bad'); return; }
   // kategori: jika 'Lain-lain', guna nilai custom yang ditaip
@@ -984,6 +1317,8 @@ async function saveProduct(){
     is_popular:document.getElementById('f_pop').checked,
     is_best_value:document.getElementById('f_best').checked,
     stages:getStages(),
+    gallery_images: galleryUrls.slice(),
+    video_url: pendingVideoUrl||'',
     status:document.getElementById('f_active').checked?'active':'draft',
     display_order: (function(){
       const cur=document.getElementById('pid').value;
@@ -1015,12 +1350,30 @@ async function saveProduct(){
       const st=document.getElementById('upStatus');
       if(st) st.textContent='Upload dibatalkan — sila pilih gambar semula.';
     }
+    if(stagedGallery.length){
+      const jg=stagedGallery.slice(); stagedGallery=[];
+      await deleteStorageFiles(jg);
+      galleryUrls=originalGallery.slice(); renderGallery();
+    }
+    if(stagedVideo.length){
+      const jv=stagedVideo.slice(); stagedVideo=[];
+      await deleteStorageFiles(jv, VIDEO_BUCKET);
+      pendingVideoUrl=originalVideoUrl; renderVideoPreview();
+    }
     toast(error.message,'bad');
     return;
   }
   stagedUploads=[];   // sudah committed ke DB, bukan lagi orphan
+  stagedGallery=[]; stagedVideo=[];
   // cover ditukar → buang fail lama (selepas DB berjaya)
   if(oldCover && oldCover!==payload.image_url) await deleteStorageFiles([oldCover]);
+  // gambar gallery yang dibuang oleh admin → padam failnya (selepas DB berjaya)
+  const goneG = originalGallery.filter(u=>payload.gallery_images.indexOf(u)===-1);
+  if(goneG.length) await deleteStorageFiles(goneG);
+  // video lama diganti/dibuang → padam fail lama jika ia fail upload kita
+  if(originalVideoUrl && originalVideoUrl!==payload.video_url){
+    await deleteStorageFiles([originalVideoUrl], VIDEO_BUCKET);
+  }
   closeModal(); toast(id?'Produk dikemas kini':'Produk ditambah','ok');
   loadProducts();
 }
@@ -1030,9 +1383,14 @@ async function removeProduct(id){
   const r=PRODUCTS.find(x=>x.id===id);
   if(!confirm(`Padam "${r?r.name:''}"? Tindakan ini kekal.`)) return;
   const oldCover = r ? r.image_url : '';
+  const oldGal   = (r && Array.isArray(r.gallery_images)) ? r.gallery_images : [];
+  // video kita = fail dalam bucket video (link luar pulang null, jadi tidak dipadam)
+  const rawVid   = (r && r.video_url) ? r.video_url : '';
+  const oldVid   = (rawVid && pathFromPublicUrl(rawVid, VIDEO_BUCKET)) ? rawVid : '';
   const { error }=await sb.from('products').delete().eq('id',id);
   if(error){ toast(error.message,'bad'); return; }
-  await deleteStorageFiles([oldCover]);   // selepas DB berjaya
+  await deleteStorageFiles([oldCover].concat(oldGal));   // selepas DB berjaya
+  if(oldVid) await deleteStorageFiles([oldVid], VIDEO_BUCKET);
   toast('Produk dipadam','ok'); loadProducts();
 }
 
@@ -1052,13 +1410,260 @@ let savingStore          = false;
 let originalStoreImageUrl= "";
 let storeUploading = false;
 
+/* ============================================================
+   SPOTLIGHT BANNER (table: banners) — V1: satu banner sahaja
+   Guna semula helper sedia ada: compressImage(), pathFromPublicUrl(),
+   deleteStorageFiles(). Tiada compressor/bucket baharu.
+   ============================================================ */
+const BANNER_DIR = 'banners/';     // folder dalam bucket product-images
+
+let BANNER            = null;      // row semasa (null = belum ada record)
+let bannerLoaded      = false;
+let pendingBannerUrl  = "";        // URL yang akan disimpan
+let originalBannerUrl = "";        // URL dalam DB — jangan padam sebelum DB berjaya
+let stagedBannerUpload= [];        // fail yang SUDAH naik tetapi BELUM masuk DB
+let bannerUploading   = false;
+let savingBanner      = false;
+let bannerSession     = 0;         // kesan upload "basi"
+
+// Guard: hanya benarkan padam fail dalam bucket kita DAN folder banners/
+function bannerStoragePath(url){
+  const path = pathFromPublicUrl(url, BUCKET);
+  if(!path) return null;                        // origin/bucket lain → jangan sentuh
+  if(path.indexOf(BANNER_DIR)!==0) return null; // luar folder banners/ → jangan sentuh
+  return path;
+}
+async function deleteBannerImage(url){
+  if(!bannerStoragePath(url)) return true;      // bukan milik kita → abaikan senyap
+  return await deleteStorageFiles([url], BUCKET);
+}
+
+function setBannerSaving(on,label){
+  savingBanner = on;
+  const btn=document.getElementById('spSaveBtn');
+  if(btn){ btn.disabled=on; btn.textContent = on ? (label||'Menyimpan…') : 'Simpan'; }
+}
+function setBannerUploading(on,label){
+  bannerUploading = on;
+  const btn=document.getElementById('spSaveBtn');
+  if(btn){ btn.disabled=on; btn.textContent = on ? (label||'Memproses…') : 'Simpan'; }
+}
+function syncSpotToggle(){
+  document.getElementById('tSpotActive').classList.toggle('on', document.getElementById('sp_active').checked);
+}
+function setBannerPreview(url){
+  const img=document.getElementById('sp_preview'), ph=document.getElementById('sp_ph'),
+        rm=document.getElementById('sp_rmBtn');
+  if(url){ img.src=url; img.classList.remove('hide'); ph.classList.add('hide'); rm.classList.remove('hide'); }
+  else   { img.classList.add('hide'); ph.classList.remove('hide'); rm.classList.add('hide'); }
+}
+
+/* ---------- LOAD ---------- */
+async function loadBanner(){
+  const st=document.getElementById('spStatus');
+  st.textContent='Memuatkan…';
+  const { data, error } = await sb.from('banners').select('*')
+    .order('display_order',{ascending:true})
+    .order('created_at',{ascending:true})
+    .limit(1);
+  if(error){
+    st.textContent='Ralat';
+    toast('Gagal memuatkan banner: '+error.message,'bad');
+    return;
+  }
+  bannerLoaded = true;
+  BANNER = (data && data.length) ? data[0] : null;
+  bannerSession++;
+  stagedBannerUpload = [];
+
+  const b = BANNER || {};
+  pendingBannerUrl  = b.image_url || '';
+  originalBannerUrl = pendingBannerUrl;
+  document.getElementById('sp_title').value    = b.title       || '';
+  document.getElementById('sp_subtitle').value = b.subtitle    || '';
+  document.getElementById('sp_btnText').value  = b.button_text || '';
+  document.getElementById('sp_btnLink').value  = b.button_link || '';
+  // record baharu default aktif; record sedia ada ikut nilai DB
+  document.getElementById('sp_active').checked = BANNER ? !!b.is_active : true;
+  document.getElementById('sp_upStatus').textContent='';
+  setBannerPreview(pendingBannerUrl);
+  syncSpotToggle();
+  setBannerSaving(false);
+
+  st.textContent = BANNER
+    ? (b.is_active ? 'Aktif — dipaparkan di katalog' : 'Tidak aktif — Spotlight tersembunyi')
+    : 'Belum ada banner — Simpan akan cipta record baharu';
+}
+
+/* ---------- UPLOAD GAMBAR ---------- */
+async function handleBannerFile(input){
+  const file=input.files&&input.files[0];
+  input.value='';
+  if(!file) return;
+  const mySession=bannerSession;
+  const st=document.getElementById('sp_upStatus');
+
+  st.textContent='Memproses gambar…';
+  setBannerUploading(true,'Memproses…');
+
+  // guna semula compressImage() sedia ada (1400px, q0.9 → 0.8 jika >500KB,
+  // dan mesej HEIC yang jelas kalau browser tak boleh decode)
+  let blob;
+  try{ blob = await compressImage(file); }
+  catch(e){
+    if(mySession!==bannerSession) return;
+    setBannerUploading(false);
+    setBannerPreview(pendingBannerUrl);
+    st.textContent='';
+    toast(e.message,'bad');
+    return;
+  }
+  if(mySession!==bannerSession) return;
+
+  setBannerPreview(URL.createObjectURL(blob));
+  const kb=Math.round(blob.size/1024);
+  setBannerUploading(true,'Memuat naik…');
+  st.textContent=`Memuat naik… (${kb}KB)`;
+
+  const ext=(blob===file ? (file.name.split('.').pop()||'jpg').toLowerCase() : 'jpg');
+  const path=`${BANNER_DIR}${Date.now()}-${Math.random().toString(36).slice(2,7)}.${ext}`;
+  const { error }=await sb.storage.from(BUCKET).upload(path,blob,{cacheControl:'3600',upsert:false,contentType:blob.type||'image/jpeg'});
+  if(error){
+    if(mySession!==bannerSession) return;
+    setBannerUploading(false);
+    st.textContent='Gagal upload: '+error.message;
+    toast('Gagal upload: '+error.message,'bad');
+    return;
+  }
+  const { data:{ publicUrl } }=sb.storage.from(BUCKET).getPublicUrl(path);
+
+  // panel ditinggalkan / dimuat semula semasa upload → fail yatim, buang terus
+  if(mySession!==bannerSession){ deleteBannerImage(publicUrl); return; }
+
+  // ganti staged sebelum ini (belum pernah masuk DB)
+  if(stagedBannerUpload.length){
+    const prev=stagedBannerUpload.slice(); stagedBannerUpload=[];
+    prev.forEach(u=>deleteBannerImage(u));
+  }
+  stagedBannerUpload=[publicUrl];
+  pendingBannerUrl=publicUrl;
+  setBannerPreview(publicUrl);
+  setBannerUploading(false);
+  st.textContent=`Gambar dimuat naik ✓ (${kb}KB)`;
+}
+
+/* ---------- REMOVE IMAGE: DB dahulu, kemudian Storage ---------- */
+async function removeBannerImage(){
+  if(bannerUploading || savingBanner){ toast('Tunggu proses selesai…','bad'); return; }
+
+  // fail staged belum pernah masuk DB → buang terus, tiada DB write perlu
+  if(stagedBannerUpload.length && pendingBannerUrl===stagedBannerUpload[0]){
+    const junk=stagedBannerUpload.slice(); stagedBannerUpload=[];
+    for(const u of junk) await deleteBannerImage(u);
+    pendingBannerUrl=originalBannerUrl;
+    setBannerPreview(pendingBannerUrl);
+    document.getElementById('sp_upStatus').textContent='Upload dibatalkan.';
+    return;
+  }
+
+  if(!pendingBannerUrl){ return; }
+  if(!confirm('Buang gambar banner?')) return;
+
+  const oldUrl=originalBannerUrl;
+
+  // belum ada record DB → cukup kosongkan borang
+  if(!BANNER){
+    pendingBannerUrl=''; setBannerPreview('');
+    return;
+  }
+
+  setBannerSaving(true,'Membuang…');
+  const { error }=await sb.from('banners')
+    .update({ image_url:'', updated_at:new Date().toISOString() })
+    .eq('id', BANNER.id);
+  setBannerSaving(false);
+  if(error){ toast('Gagal kemas kini: '+error.message,'bad'); return; }
+
+  // DB berjaya → baru padam fail lama
+  BANNER.image_url=''; pendingBannerUrl=''; originalBannerUrl='';
+  setBannerPreview('');
+  if(oldUrl){
+    const ok=await deleteBannerImage(oldUrl);
+    if(!ok) toast('Gambar dibuang dari banner, tetapi fail lama gagal dipadam','bad');
+  }
+  toast('Gambar dibuang','ok');
+}
+
+/* ---------- SAVE: INSERT jika tiada row, UPDATE jika ada ---------- */
+async function saveBanner(){
+  if(bannerUploading){ toast('Tunggu gambar selesai dimuat naik…','bad'); return; }
+  if(savingBanner) return;                       // elak double-submit
+
+  const payload={
+    title:       document.getElementById('sp_title').value.trim(),
+    subtitle:    document.getElementById('sp_subtitle').value.trim(),
+    image_url:   pendingBannerUrl || '',
+    button_text: document.getElementById('sp_btnText').value.trim(),
+    button_link: document.getElementById('sp_btnLink').value.trim(),
+    is_active:   document.getElementById('sp_active').checked,
+    updated_at:  new Date().toISOString()
+  };
+
+  const oldUrl = originalBannerUrl;
+  setBannerSaving(true,'Menyimpan…');
+
+  let error, row;
+  if(BANNER && BANNER.id){
+    ({ error } = await sb.from('banners').update(payload).eq('id', BANNER.id));
+  }else{
+    payload.display_order = 0;
+    const res = await sb.from('banners').insert([payload]).select().limit(1);
+    error = res.error;
+    row   = (res.data && res.data.length) ? res.data[0] : null;
+  }
+  setBannerSaving(false);
+
+  if(error){
+    // DB gagal → buang upload baharu, KEKALKAN gambar lama dalam DB
+    if(stagedBannerUpload.length){
+      const junk=stagedBannerUpload.slice(); stagedBannerUpload=[];
+      for(const u of junk) await deleteBannerImage(u);
+      pendingBannerUrl=originalBannerUrl;
+      setBannerPreview(originalBannerUrl);
+      document.getElementById('sp_upStatus').textContent='Upload dibatalkan — sila pilih gambar semula.';
+    }
+    toast(error.message,'bad');
+    return;
+  }
+
+  stagedBannerUpload=[];                         // sudah committed
+  if(row) BANNER = row;                          // record baharu daripada INSERT
+  else if(BANNER) Object.assign(BANNER, payload);
+
+  // gambar ditukar → padam fail lama SELEPAS DB berjaya
+  if(oldUrl && oldUrl!==payload.image_url){
+    const ok=await deleteBannerImage(oldUrl);
+    if(!ok) toast('Banner disimpan, tetapi fail gambar lama gagal dipadam','bad');
+  }
+  originalBannerUrl = payload.image_url;
+
+  document.getElementById('spStatus').textContent =
+    payload.is_active ? 'Aktif — dipaparkan di katalog' : 'Tidak aktif — Spotlight tersembunyi';
+  toast('Banner disimpan','ok');
+}
+
 function switchTab(which){
   const isP = which==='products';
+  const isS = which==='stores';
+  const isB = which==='spotlight';
   document.getElementById('panelProducts').classList.toggle('hide', !isP);
-  document.getElementById('panelStores').classList.toggle('hide', isP);
+  document.getElementById('panelStores').classList.toggle('hide', !isS);
+  document.getElementById('panelSpot').classList.toggle('hide', !isB);
   document.getElementById('tabProducts').classList.toggle('on', isP);
-  document.getElementById('tabStores').classList.toggle('on', !isP);
-  if(!isP && STORES.length===0) loadStores();
+  document.getElementById('tabStores').classList.toggle('on', isS);
+  document.getElementById('tabSpot').classList.toggle('on', isB);
+  if(isS && STORES.length===0) loadStores();
+  if(isB && !bannerLoaded) loadBanner();
 }
 
 async function loadStores(){
