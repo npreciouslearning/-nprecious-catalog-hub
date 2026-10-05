@@ -180,6 +180,12 @@ section{scroll-margin-top:84px}
   /* Our Main Product juga maks 3 produk → corak sama seperti .grid-value */
   .grid-main{grid-template-columns:repeat(3,1fr)}
 }
+/* Mobile: Our Main Product 1 lajur penuh-lebar supaya cover produk besar
+   dan teks dalam artwork boleh dibaca. .grid TIDAK disentuh — Best Sellers,
+   Pakej Berbaloi dan Semua Produk kekal 2 lajur. */
+@media(max-width:640px){
+  .grid-main{grid-template-columns:1fr;gap:16px}
+}
 /* Our Main Product: sentuhan premium MINIMAL — hanya warna bingkai.
    Semua rule .card / .grid .card lain kekal dikongsi, tiada CSS diduplikasi. */
 .grid-main .card{border-color:var(--lilac)}
