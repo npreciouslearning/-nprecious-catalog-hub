@@ -177,7 +177,13 @@ section{scroll-margin-top:84px}
 @media(min-width:901px){
   /* Pakej Paling Berbaloi ambil maks 3 produk → hadkan 3 lajur supaya tiada slot kosong */
   .grid-value{grid-template-columns:repeat(3,1fr)}
+  /* Our Main Product juga maks 3 produk → corak sama seperti .grid-value */
+  .grid-main{grid-template-columns:repeat(3,1fr)}
 }
+/* Our Main Product: sentuhan premium MINIMAL — hanya warna bingkai.
+   Semua rule .card / .grid .card lain kekal dikongsi, tiada CSS diduplikasi. */
+.grid-main .card{border-color:var(--lilac)}
+.grid-main .card:hover{border-color:var(--blush)}
 
 /* Base product card — dikongsi oleh Best Sellers, Pakej Paling Berbaloi & Semua Produk */
 .card{
@@ -227,6 +233,7 @@ section{scroll-margin-top:84px}
   font-size:.68rem;padding:5px 12px;border-radius:100px}
 .badge-pop{background:var(--blush);color:#fff}
 .badge-val{background:var(--cream);color:var(--ink);border:1.5px solid var(--line)}
+.badge-main{background:var(--blush-deep);color:#fff}
 
 /* ---------- SPOTLIGHT (banner V1 — satu banner, tiada carousel) ---------- */
 .spot{
@@ -413,6 +420,19 @@ footer p{color:var(--ink-soft);font-size:.8rem}
         <span class="eyebrow">Spotlight</span>
       </div>
       <div id="spotBox"></div>
+    </div>
+  </section>
+
+  <!-- ============ OUR MAIN PRODUCT ============ -->
+  <!-- Tersembunyi secara lalai; hanya dipaparkan jika ada produk is_main_product -->
+  <section class="band band-lilac hide" id="mainproduct">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Pilihan Utama</span>
+        <h2>Our Main Product</h2>
+        <p>Produk teras NPrecious Learning.</p>
+      </div>
+      <div class="grid grid-main" id="mainGrid"></div>
     </div>
   </section>
 
@@ -775,6 +795,20 @@ footer p{color:var(--ink-soft);font-size:.8rem}
   }
 
   /* ---------- sections ---------- */
+  // Our Main Product — maks 3, susunan ikut PRODUCTS (display_order ASC, created_at ASC).
+  // Tiada query Supabase tambahan; tiada empty state — section terus disembunyikan.
+  function renderMain(){
+    var el=document.getElementById('mainGrid');
+    var sec=document.getElementById('mainproduct');
+    var list=PRODUCTS.filter(function(p){ return p.is_main_product; }).slice(0,3);
+    if(list.length===0){ sec.classList.add('hide'); return; }
+    sec.classList.remove('hide');
+    el.innerHTML=list.map(function(p){
+      return cardHtml(p,{badge:'Main Product',badgeClass:'badge-main'});
+    }).join('');
+    reveal(el);
+  }
+
   function renderBest(){
     var el=document.getElementById('bestGrid');
     var sec=document.getElementById('bestsellers');
@@ -874,6 +908,7 @@ footer p{color:var(--ink-soft);font-size:.8rem}
   function renderEverything(){
     renderStageGrid();
     renderCatBar();
+    renderMain();
     renderBest();
     renderValue();
     renderAll();
@@ -953,6 +988,7 @@ footer p{color:var(--ink-soft);font-size:.8rem}
 
       if(PRODUCTS.length===0){
         document.getElementById('allGrid').innerHTML='<div class="state"><span class="em">\ud83d\udce6</span>Tiada produk aktif buat masa ini.</div>';
+        document.getElementById('mainproduct').classList.add('hide');
         document.getElementById('bestsellers').classList.add('hide');
         document.getElementById('berbaloi').classList.add('hide');
         document.getElementById('tahap').classList.add('hide');
@@ -969,8 +1005,8 @@ footer p{color:var(--ink-soft);font-size:.8rem}
   /* ---------- product detail modal: buka & tutup ---------- */
   window.closeProduct = closeProduct;   // dipanggil oleh inline onclick butang ×
 
-  // klik / Enter pada kad membuka modal (delegasi pada 3 grid)
-  ['bestGrid','valueGrid','allGrid'].forEach(function(gid){
+  // klik / Enter pada kad membuka modal (delegasi pada semua grid produk)
+  ['mainGrid','bestGrid','valueGrid','allGrid'].forEach(function(gid){
     var g=document.getElementById(gid);
     if(!g) return;
     g.addEventListener('click',function(e){
