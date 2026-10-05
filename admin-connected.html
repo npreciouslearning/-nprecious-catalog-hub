@@ -469,6 +469,10 @@ tbody tr:hover{background:rgba(245,55,154,.03)}
             <input type="checkbox" id="f_best" onchange="syncToggles()">
             <span class="t-txt"><b>Best Value</b><small>Papar dalam Pakej Paling Berbaloi</small></span>
           </label>
+          <label class="toggle" id="tMain">
+            <input type="checkbox" id="f_main" onchange="syncToggles()">
+            <span class="t-txt"><b>Main Product</b><small>Papar dalam Our Main Product (maks 3)</small></span>
+          </label>
           <label class="toggle" id="tStatus">
             <input type="checkbox" id="f_active" onchange="syncToggles()">
             <span class="t-txt"><b>Active</b><small>Nampak di katalog (jika tidak = Draft)</small></span>
@@ -830,6 +834,7 @@ function openModal(id){
   document.getElementById('f_link').value = r? (r.purchase_link||'') : '';
   document.getElementById('f_pop').checked = r? !!r.is_popular : false;
   document.getElementById('f_best').checked = r? !!r.is_best_value : false;
+  document.getElementById('f_main').checked = r? !!r.is_main_product : false;
   setStages(r ? (r.stages||[]) : []);
   document.getElementById('f_active').checked = r? (r.status==='active') : true;
   pendingImageUrl = r? (r.image_url||'') : '';
@@ -1136,6 +1141,7 @@ document.addEventListener('change', function(e){
 function syncToggles(){
   document.getElementById('tPop').classList.toggle('on', document.getElementById('f_pop').checked);
   document.getElementById('tBest').classList.toggle('on', document.getElementById('f_best').checked);
+  document.getElementById('tMain').classList.toggle('on', document.getElementById('f_main').checked);
   document.getElementById('tStatus').classList.toggle('on', document.getElementById('f_active').checked);
 }
 
@@ -1316,6 +1322,7 @@ async function saveProduct(){
     image_url:pendingImageUrl||'',
     is_popular:document.getElementById('f_pop').checked,
     is_best_value:document.getElementById('f_best').checked,
+    is_main_product:document.getElementById('f_main').checked,
     stages:getStages(),
     gallery_images: galleryUrls.slice(),
     video_url: pendingVideoUrl||'',
