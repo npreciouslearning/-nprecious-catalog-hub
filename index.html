@@ -180,11 +180,29 @@ section{scroll-margin-top:84px}
   /* Our Main Product juga maks 3 produk → corak sama seperti .grid-value */
   .grid-main{grid-template-columns:repeat(3,1fr)}
 }
-/* Mobile: Our Main Product 1 lajur penuh-lebar supaya cover produk besar
-   dan teks dalam artwork boleh dibaca. .grid TIDAK disentuh — Best Sellers,
-   Pakej Berbaloi dan Semua Produk kekal 2 lajur. */
+/* Mobile: Our Main Product jadi lajur swipe mendatar (native scroll, tiada
+   library, tiada autoplay, tiada arrow). Container kekal "grid grid-main",
+   jadi semua rule .grid .card mobile masih terpakai.
+   .grid TIDAK disentuh — Best Sellers, Pakej Berbaloi dan Semua Produk
+   kekal 2 lajur seperti biasa. */
 @media(max-width:640px){
-  .grid-main{grid-template-columns:1fr;gap:16px}
+  .grid-main{
+    display:flex;
+    overflow-x:auto;
+    gap:12px;
+    scroll-snap-type:x proximity;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:6px;
+    scrollbar-width:none;
+    overscroll-behavior-x:contain;   /* swipe tak tersasar ke navigasi pelayar */
+  }
+  .grid-main::-webkit-scrollbar{display:none}
+  /* 64% → ~1.5 kad kelihatan, jadi kad seterusnya jelas "ada lagi".
+     opacity/transform ditetapkan kerana kad di luar skrin mendatar tidak
+     mencetuskan IntersectionObserver — tanpa ini kad ke-3 kelihatan kosong
+     semasa di-swipe masuk. Animasi reveal dimatikan untuk section ini pada
+     mobile sahaja; section lain tidak terjejas. */
+  .grid-main .card{flex:0 0 64%;scroll-snap-align:start;opacity:1;transform:none}
 }
 /* Our Main Product: sentuhan premium MINIMAL — hanya warna bingkai.
    Semua rule .card / .grid .card lain kekal dikongsi, tiada CSS diduplikasi. */
