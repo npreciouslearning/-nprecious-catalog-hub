@@ -650,21 +650,28 @@ body::after { top: 60px; left: 0; width: min(340px, 85vw); height: 380px; backgr
 .qnav:active { transform: translateY(-50%) scale(.94); }
 .qnav[hidden] { display: none; }
 
-/* First-visit guide */
-.tip { position: relative; margin-top: 10px; padding: 10px 12px 10px 14px; border: 1px solid var(--lilac-200); border-radius: 16px; background: #fff; box-shadow: 0 4px 14px rgba(114, 86, 201, .12); font-size: 13.5px; line-height: 1.4; color: var(--ink); animation: tip-in .25s ease-out both; }
-.tip::before { content: ''; position: absolute; top: -6px; width: 10px; height: 10px; background: #fff; border-left: 1px solid var(--lilac-200); border-top: 1px solid var(--lilac-200); transform: rotate(45deg); }
-@keyframes tip-in { from { opacity: 0; transform: translateY(-4px); } }
-.tip--filter { display: flex; align-items: center; gap: 10px; margin-left: auto; width: fit-content; max-width: 100%; }
-.tip--filter[hidden], .tip--shopby[hidden] { display: none; }
-.tip--filter::before { right: 40px; }
-.tip--filter p { flex: 1; min-width: 0; }
-.tip__ok { flex: none; min-height: 32px; padding: 0 14px; border: 0; border-radius: 999px; background: var(--lilac-100); color: var(--purple-deep); font-weight: 700; font-size: 13px; }
-.tip--shopby::before { left: 34px; }
-.tip__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.tip__title { font-family: var(--font-display); font-weight: 600; font-size: 14.5px; color: var(--purple-deep); }
-.tip__x { display: grid; place-items: center; width: 30px; height: 30px; margin: -4px -4px -4px 0; padding: 0; border: 0; border-radius: 50%; background: var(--lilac-50); color: var(--ink-2); }
-.tip__x .icon { width: 16px; height: 16px; }
-.tip__list { display: grid; gap: 6px; margin: 8px 0 2px; padding: 0; list-style: none; }
+/* First-visit guide — steps B and C share the look of step A (purple, Fredoka, soft shadow) */
+.tip { position: relative; margin-top: 12px; border-radius: 22px; font-family: var(--font-display); line-height: 1.3; animation: tip-in .3s cubic-bezier(.2, .9, .3, 1.2) both; }
+.tip::before { content: ''; position: absolute; top: -6px; width: 14px; height: 14px; border-radius: 3px 0 0 0; transform: rotate(45deg); }
+@keyframes tip-in { from { opacity: 0; transform: translateY(-6px) scale(.97); } }
+.tip[hidden] { display: none; }
+.tip__title { font-weight: 700; font-size: 16.5px; letter-spacing: .04em; }
+
+/* Step B: Filter */
+.tip--filter { display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 18px; margin-left: 0; width: auto; background: linear-gradient(135deg, var(--purple), var(--purple-deep)); color: #fff; box-shadow: 0 10px 26px rgba(91, 65, 175, .32), 0 2px 6px rgba(91, 65, 175, .2); }
+.tip--filter::before { right: 44px; background: var(--purple); }
+.tip__txt { flex: 1; min-width: 0; }
+.tip__desc { margin-top: 2px; font-weight: 500; font-size: 13.5px; opacity: .95; }
+.tip__ok { flex: none; min-height: 38px; padding: 0 16px; border: 0; border-radius: 999px; background: #FFF8EC; color: var(--purple-deep); font-family: var(--font-display); font-weight: 600; font-size: 13.5px; letter-spacing: .05em; box-shadow: 0 2px 6px rgba(30, 20, 80, .15); }
+.tip__ok:active { transform: scale(.96); }
+
+/* Step C: Shop by */
+.tip--shopby { overflow: visible; padding: 0; background: #fff; border: 1px solid var(--lilac-200); box-shadow: 0 10px 26px rgba(91, 65, 175, .22), 0 2px 6px rgba(91, 65, 175, .12); }
+.tip--shopby::before { left: 34px; background: var(--purple); }
+.tip__head { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 11px 10px 11px 18px; border-radius: 21px 21px 0 0; background: linear-gradient(135deg, var(--purple), var(--purple-deep)); color: #fff; }
+.tip__x { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: rgba(255, 255, 255, .2); color: #fff; }
+.tip__x .icon { width: 16px; height: 16px; stroke-width: 2.2; }
+.tip__list { display: grid; gap: 7px; margin: 0; padding: 12px 16px 14px; list-style: none; font-family: var(--font-body); font-size: 13.5px; line-height: 1.35; color: var(--ink); }
 .tip__list li { display: flex; align-items: center; gap: 10px; }
 .tip__list b { font-weight: 700; }
 .tip__ic { display: grid; place-items: center; width: 26px; height: 26px; flex: none; border-radius: 9px; background: var(--tile-bg); color: var(--tile-ink); }
@@ -1173,8 +1180,8 @@ function renderPage() {
         <p class="filter-help only-mobile">Tapis ikut kategori &amp; umur</p>
         <!-- first visit only (phones): step 2 of the guide -->
         <div class="tip tip--filter only-mobile" id="tip-filter" role="note" hidden>
-          <p>Tekan <b>Filter</b> untuk pilih kategori &amp; umur anak.</p>
-          <button type="button" class="tip__ok" data-action="tip-ok">Faham</button>
+          <div class="tip__txt"><p class="tip__title">FILTER PRODUK</p><p class="tip__desc">Tapis ikut kategori &amp; umur anak</p></div>
+          <button type="button" class="tip__ok" data-action="tip-ok">FAHAM</button>
         </div>
         <!-- phones / tablets only: product type + Shop by stay on the page (on desktop they are in the sidebar) -->
         <div class="types m-types only-mobile" id="type-tabs-m" role="group" aria-label="Product type"></div>
@@ -1185,7 +1192,7 @@ function renderPage() {
         </div>
         <!-- first visit only (phones): step 3 of the guide -->
         <div class="tip tip--shopby only-mobile" id="tip-shopby" role="note" hidden>
-          <div class="tip__head"><p class="tip__title">Pilih ikut keperluan anda</p>
+          <div class="tip__head"><p class="tip__title">PILIH IKUT KEPERLUAN</p>
             <button type="button" class="tip__x" data-action="tip-close" aria-label="Tutup panduan">${icon('x')}</button></div>
           <ul class="tip__list">
             ${SHOP_BY_HELP.map(([key, label, text], i) => `<li><span class="tip__ic tone-${[4, 0, 2, 3][i]}" aria-hidden="true">${icon(CURATED.find(c => c[0] === key)[3])}</span><span><b>${label}</b> — ${text}</span></li>`).join('')}
