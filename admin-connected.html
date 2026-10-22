@@ -385,6 +385,16 @@ html.is-sorting, html.is-sorting * { cursor: grabbing !important; -webkit-user-s
 .notice { padding: 12px 14px; border-radius: var(--r-ctl); font-size: 14px; margin-bottom: 16px; }
 .notice--error { background: var(--rose-50); color: var(--rose-ink); }
 .notice--info { background: var(--lilac-50); color: var(--ink); }
+.notice--warn { background: var(--amber-50); color: var(--amber-ink); }
+/* Product video (upload or link) */
+.vbox { margin-bottom: 12px; border: 1px solid var(--line); border-radius: var(--r-ctl); background: var(--lilac-50); overflow: hidden; }
+.vbox video { display: block; width: 100%; max-height: 260px; background: #12152B; }
+.vbox__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 10px 12px; font-size: 13.5px; }
+.vbox__name { font-weight: 600; overflow-wrap: anywhere; }
+.vbox__empty { padding: 16px 12px; text-align: center; color: var(--ink-2); font-size: 14px; }
+.vbtns { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.vbtns .btn { flex: 1 1 160px; }
+.vbtns label.btn { cursor: pointer; }
 .notice code { font-size: 13px; background: rgba(255,255,255,.7); padding: 1px 5px; border-radius: 6px; }
 
 /* Toasts */
@@ -491,6 +501,8 @@ const ICONS = {
   chat: '<path d="M4 20l1.5-4A8 8 0 1 1 9 19z"/>',
   logout: '<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>',
   truck: '<path d="M3 6h11v10H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.5"/><circle cx="17" cy="17.5" r="1.5"/>',
+  upload: '<path d="M12 16V5M7.5 9.5 12 5l4.5 4.5"/><path d="M5 19h14"/>',
+  video: '<rect x="3" y="6" width="13" height="12" rx="2.5"/><path d="m16 10 5-3v10l-5-3z"/>',
   grip: '<path d="M5 8h14M5 12h14M5 16h14"/>'
 };
 function icon(name, extra = '') {
@@ -1301,6 +1313,12 @@ function openProductEditor(product = null) {
     id: product?.id || null,
     images: product ? sortedImages(product).map(i => ({ id: i.id, url: i.image_url })) : [],
     removed: [],
+    // Product video. savedVideo = the link in the database now. A file picked here is
+    // uploaded only when the product is saved (videoFile); the old Store file is deleted
+    // only after that save has worked.
+    savedVideo: product?.video_url || null,
+    videoFile: null,
+    videoPreview: null,
     categoryId: product?.category_id || null,      // the category this product is saved in
     // Still filed under the old catch-all (Others / Lain-lain): it needs a real category before it can be saved.
     legacy: !!product?.category_id && isLegacyCategoryName(savedCategoryName),
@@ -1440,10 +1458,21 @@ function openProductEditor(product = null) {
             <span class="toggle__text"><strong>FREE</strong><span>Shows under FREE on your storefront. A label only: it does not change the price or the shipping fee.</span></span>
             <span class="switch"><input type="checkbox" name="is_free" ${p.is_free ? 'checked' : ''}><i></i></span>
           </label>
-          <label class="field" data-field="video_url"><span class="field__label">Video URL</span>
+        </div>
+
+        <div class="group" id="video-group">
+          <div class="group__title"><span>Product video</span><span class="badge">Optional</span></div>
+          <div id="video-box"></div>
+          <div class="vbtns">
+            <label class="btn btn--ghost btn--sm" id="video-pick">${icon('upload')}<span>Upload video</span>
+              <input class="sr-only" type="file" id="video-input" accept="${VIDEO_ACCEPT}"></label>
+            <button type="button" class="btn btn--ghost btn--sm" data-action="video-remove" id="video-remove">${icon('trash')}<span>Remove video</span></button>
+          </div>
+          <p class="field__hint" style="margin:0 0 12px"><strong>MP4 is recommended</strong> (plays on iPhone and Android). MOV and WEBM are also accepted. Max 50 MB. The file is uploaded when you press SAVE PRODUCT.</p>
+          <label class="field" data-field="video_url"><span class="field__label">…or paste a video link</span>
             <input class="input" name="video_url" type="url" inputmode="url" autocapitalize="none" autocomplete="off" spellcheck="false" maxlength="2000" value="${val(p.video_url)}" placeholder="Optional — https://">
             <span class="field__error">Enter a full web link that starts with https:// (or http://), or leave it empty.</span>
-            <span class="field__hint">A YouTube link or a direct .mp4 link. Shown in the product details on the Hub.</span></label>
+            <span class="field__hint">A direct .mp4 link plays inside the product details. Other links (YouTube, Google Drive) show an OPEN VIDEO button instead.</span></label>
         </div>
       </form>`,
     footer: `
@@ -1451,6 +1480,7 @@ function openProductEditor(product = null) {
       <button class="btn btn--primary" data-action="save-product" id="save-product-btn">SAVE PRODUCT</button>`
   });
   renderEditorImages();
+  renderEditorVideo();
   applyProductType();
   renderProfit();
 }
@@ -1558,6 +1588,106 @@ function addEditorImages(fileList) {
   files.slice(0, room).forEach(file => ed.images.push({ file, url: URL.createObjectURL(file) }));
   renderEditorImages();
 }
+/* ----- Product video -----
+   Two ways: upload a file (stored in this project's "product-videos" bucket) or paste
+   a link. Rules:
+     * a picked file is checked here (type, extension, content, size) and uploaded
+       only when the product is saved;
+     * the old video FILE is deleted only after the new video is uploaded AND the
+       product row is saved — a failed save never loses the old video;
+     * only files of THIS project's "product-videos" bucket are ever deleted. A link
+       to anything else (old Learning Hub storage, YouTube …) is only unlinked. */
+const VIDEO_BUCKET = 'product-videos';
+const VIDEO_MAX_BYTES = 50 * 1024 * 1024;
+const VIDEO_TYPES = { mp4: 'video/mp4', mov: 'video/quicktime', webm: 'video/webm' };
+const VIDEO_ACCEPT = 'video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm';
+const MOV_WARNING = 'Format MOV mungkin tidak serasi pada sesetengah peranti Android. MP4 disyorkan untuk keserasian terbaik.';
+const fileSize = bytes => bytes >= 1048576 ? (bytes / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(bytes / 1024)) + ' KB';
+/** Path of a video in THIS project's product-videos bucket, or null for any other link. */
+const storeVideoPath = url => storagePath(VIDEO_BUCKET, url);
+/**
+ * Checks a picked file. Resolves with { ext, type } or throws a message for the seller.
+ * Extension AND type must both say mp4 / mov / webm (an empty type is allowed — some
+ * computers do not report one for .mov), and the first bytes must look like a video.
+ */
+async function checkVideoFile(file) {
+  const ext = (String(file?.name || '').match(/\.([a-z0-9]+)$/i)?.[1] || '').toLowerCase();
+  const type = String(file?.type || '').toLowerCase();
+  if (!VIDEO_TYPES[ext]) throw new Error('This is not a video file we accept. Use an MP4 (recommended), MOV or WEBM video.');
+  if (type && type !== VIDEO_TYPES[ext]) throw new Error(`“${file.name}” is not a real ${ext.toUpperCase()} video (its type is ${type}). Use an MP4 (recommended), MOV or WEBM video.`);
+  if (!file.size) throw new Error('This video file is empty.');
+  if (file.size > VIDEO_MAX_BYTES) throw new Error(`This video is larger than 50 MB (${(file.size / 1048576).toFixed(2)} MB). Please use a shorter or smaller video (MP4 recommended).`);
+  const head = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+  const tag = String.fromCharCode(...head.slice(4, 8));
+  const looksLikeVideo = ext === 'webm'
+    ? head[0] === 0x1A && head[1] === 0x45 && head[2] === 0xDF && head[3] === 0xA3
+    : ['ftyp', 'moov', 'mdat', 'wide', 'free', 'skip', 'pnot'].includes(tag);
+  if (!looksLikeVideo) throw new Error(`“${file.name}” does not look like a video file. Use an MP4 (recommended), MOV or WEBM video.`);
+  return { ext, type: VIDEO_TYPES[ext] };
+}
+async function pickVideo(file) {
+  const ed = state.editor;
+  if (!ed || !file) return;
+  try {
+    const info = await checkVideoFile(file);
+    if (ed.videoPreview) URL.revokeObjectURL(ed.videoPreview);
+    ed.videoFile = Object.assign(file, { _ext: info.ext, _type: info.type });
+    ed.videoPreview = URL.createObjectURL(file);
+    renderEditorVideo();
+  } catch (error) {
+    toast(error.message, 'error');
+  }
+}
+function removeEditorVideo() {
+  const ed = state.editor;
+  const form = $('#product-form');
+  if (!ed || !form) return;
+  if (ed.videoPreview) URL.revokeObjectURL(ed.videoPreview);
+  ed.videoFile = null;
+  ed.videoPreview = null;
+  form.video_url.value = '';
+  $('[data-field="video_url"]', form).classList.remove('has-error');
+  renderEditorVideo();
+}
+/** The video box: the picked file (not uploaded yet), the saved video, or nothing. */
+function renderEditorVideo() {
+  const ed = state.editor;
+  const form = $('#product-form');
+  const box = $('#video-box');
+  if (!ed || !form || !box) return;
+  const f = ed.videoFile;
+  const link = form.video_url.value.trim();
+  form.video_url.disabled = !!f;                // a picked file wins over the link box
+  $('#video-remove').hidden = !f && !link;
+  $('span', $('#video-pick')).textContent = f || link ? 'Replace video' : 'Upload video';
+  if (f) {
+    box.innerHTML = `<div class="vbox">
+        <video src="${esc(ed.videoPreview)}" controls playsinline preload="metadata"></video>
+        <div class="vbox__meta"><span class="badge badge--amber">Not saved yet</span><span class="vbox__name">${esc(f.name)}</span><span class="muted">${fileSize(f.size)} · ${f._ext.toUpperCase()}</span></div>
+      </div>
+      ${f._ext === 'mov' ? `<p class="notice notice--warn" id="mov-warning" role="status">${esc(MOV_WARNING)}</p>` : ''}`;
+    return;
+  }
+  if (!link) { box.innerHTML = `<div class="vbox"><div class="vbox__empty">${icon('video')} No video</div></div>`; return; }
+  const where = storeVideoPath(link) ? 'Uploaded video' : /nmknlvmrcrkvojveueat/.test(link) ? 'Old Learning Hub storage' : 'Video link';
+  const plays = isHttpUrl(link) && /\.(mp4|mov|webm)(\?|#|$)/i.test(link);
+  box.innerHTML = `<div class="vbox">
+      ${plays ? `<video src="${esc(link)}" controls playsinline preload="none"></video>` : ''}
+      <div class="vbox__meta"><span class="badge">${where}</span><span class="vbox__name">${esc(decodeURIComponent(link.split('/').pop().split('?')[0]) || link)}</span></div>
+    </div>`;
+}
+/** Uploads the picked video. Returns its public link. */
+async function uploadVideo(productId, file) {
+  const path = `products/${productId}/${randomId()}.${file._ext}`;
+  const { error } = await sb.storage.from(VIDEO_BUCKET).upload(path, file, { contentType: file._type, cacheControl: '31536000', upsert: false });
+  if (error) {
+    if (/bucket not found/i.test(error.message || '')) throw new Error('Video upload is not set up yet: run video_upload.sql in Supabase (SQL Editor) first.');
+    if (/exceeded the maximum|too large|413/i.test(error.message || '')) throw new Error('This video is larger than 50 MB.');
+    throw error;
+  }
+  return { path, url: sb.storage.from(VIDEO_BUCKET).getPublicUrl(path).data.publicUrl };
+}
+
 /** Live cost & profit numbers. Calculated on screen only — never saved to the database. */
 function renderProfit() {
   const form = $('#product-form');
@@ -1589,7 +1719,7 @@ async function saveProduct(btn) {
   const stock = /^\d+$/.test(stockText) ? parseInt(stockText, 10) : null;
   const digital = form.product_type.value === 'digital';
   const link = form.external_url.value.trim();
-  const video = form.video_url.value.trim();
+  let video = ed.videoFile ? '' : form.video_url.value.trim();    // a picked file replaces the link on save
   // Digital only: 'external' (GET ACCESS -> link) or 'whatsapp' (WHATSAPP SELLER -> chat with the store's number)
   const action = digital && form.digital_action.value === 'whatsapp' ? 'whatsapp' : 'external';
   // An 'external' digital product must have a link to be listed. Only a hidden draft may wait for it.
@@ -1678,16 +1808,46 @@ async function saveProduct(btn) {
     }
     const categoryBefore = categoryById(row.category_id);
 
-    // 1. Product row
+    // 1. Product row. A new product is created first WITHOUT a new video file, so the
+    //    file can be stored under its id; the video is set right after (step 1b).
     let productId = ed.id;
+    const oldVideo = ed.savedVideo;
     if (productId) {
-      const { error } = await sb.from('products').update(row).eq('id', productId);
-      if (error) throw error;
+      if (!ed.videoFile) {
+        const { error } = await sb.from('products').update(row).eq('id', productId);
+        if (error) throw error;
+      }
     } else {
-      const { data, error } = await sb.from('products').insert(row).select('id').single();
+      const { data, error } = await sb.from('products').insert(ed.videoFile ? { ...row, video_url: null } : row).select('id').single();
       if (error) throw error;
       productId = data.id;
       ed.id = productId;       // if an image upload fails below, a retry updates instead of duplicating
+      ed.savedVideo = ed.videoFile ? null : row.video_url;
+    }
+
+    // 1b. New video file: upload it, THEN save the product with its link. If the save
+    //     fails, the new file is removed again and the old video stays as it was.
+    if (ed.videoFile) {
+      $('span:last-child', btn).textContent = `Uploading video (${fileSize(ed.videoFile.size)})…`;
+      const up = await uploadVideo(productId, ed.videoFile);
+      row.video_url = up.url;
+      const { error } = await sb.from('products').update(row).eq('id', productId);
+      if (error) {
+        await sb.storage.from(VIDEO_BUCKET).remove([up.path]).catch(() => {});
+        throw error;
+      }
+      if (ed.videoPreview) URL.revokeObjectURL(ed.videoPreview);
+      ed.videoFile = null;
+      ed.videoPreview = null;
+      form.video_url.value = up.url;
+    }
+    // The product now points at its new video (or none). Only now may the OLD file go —
+    // and only if it is a file of this project's product-videos bucket.
+    ed.savedVideo = row.video_url;
+    const oldPath = oldVideo && oldVideo !== row.video_url ? storeVideoPath(oldVideo) : null;
+    if (oldPath) {
+      const { error } = await sb.storage.from(VIDEO_BUCKET).remove([oldPath]);
+      if (error) console.warn('Old video file was not deleted:', error);
     }
 
     // 2. Upload new images (compressed in the browser first)
@@ -1767,9 +1927,11 @@ async function deleteProduct(id) {
       toast('Product hidden from the store', 'success');
     } else {
       const paths = (p.product_images || []).map(i => storagePath('product-images', i.image_url)).filter(Boolean);
+      const videoPath = storeVideoPath(p.video_url);       // only a file of this project's product-videos bucket
       const { error } = await sb.from('products').delete().eq('id', id);   // image rows go with it (cascade)
       if (error) throw error;
       if (paths.length) await sb.storage.from('product-images').remove(paths);
+      if (videoPath) await sb.storage.from(VIDEO_BUCKET).remove([videoPath]);
       toast('Product deleted', 'success');
     }
     await loadProducts();
@@ -2382,6 +2544,7 @@ const actions = {
     [ed.images[i], ed.images[j]] = [ed.images[j], ed.images[i]];
     renderEditorImages();
   },
+  'video-remove': () => removeEditorVideo(),
   'img-remove': el => {
     const ed = state.editor;
     const [img] = ed.images.splice(Number(el.dataset.index), 1);
@@ -2429,6 +2592,7 @@ document.addEventListener('input', event => {
   const el = event.target;
   if (el.id === 'product-search') { state.productFilter.q = el.value; renderProductList(); }
   else if (el.form?.id === 'product-form' && ['price', 'cost_price', 'stock_quantity'].includes(el.name)) renderProfit();
+  else if (el.form?.id === 'product-form' && el.name === 'video_url') renderEditorVideo();
   // Clear a field's error as soon as the user starts fixing it
   el.closest('.field.has-error')?.classList.remove('has-error');
 });
@@ -2436,6 +2600,7 @@ document.addEventListener('change', event => {
   const el = event.target;
   if (el.id === 'product-category') { state.productFilter.category = el.value; renderProductList(); }
   else if (el.id === 'img-input') { addEditorImages(el.files); el.value = ''; }
+  else if (el.id === 'video-input') { const f = el.files[0]; el.value = ''; pickVideo(f); }
   else if (el.name === 'product_type' && el.form?.id === 'product-form') { applyProductType(); renderProfit(); }
   else if (el.name === 'digital_action' && el.form?.id === 'product-form') applyProductType();
   else if (el.name === 'category_id' && el.form?.id === 'product-form') {
