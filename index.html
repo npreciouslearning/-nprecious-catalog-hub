@@ -22,7 +22,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 <title>NPrecious Learning</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fredoka:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ---------- Design tokens ---------- */
 :root {
@@ -480,10 +480,7 @@ body.is-filtering { overflow: hidden; }
 .brand { margin-bottom: 16px; padding: 20px 14px 16px; border: 1px solid var(--line); border-radius: 22px; background: linear-gradient(165deg, var(--blush-50), var(--lilac-50) 70%); text-align: center; }
 .brand .store__logo { width: 80px; height: 80px; margin: 0 auto; border: 3px solid #fff; border-radius: 50%; box-shadow: 0 4px 14px rgba(46, 32, 110, .12); }
 .brand__name { margin-top: 10px; font-family: var(--font-display); font-weight: 600; font-size: 21px; line-height: 1.2; overflow-wrap: anywhere; }
-.brand__desc { margin-top: 8px; font-size: 13px; color: var(--ink-2); white-space: pre-line; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; }
-.brand__actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
-.brand__actions .btn { min-height: 40px; padding: 0 8px; font-size: 13px; gap: 6px; }
-.brand__actions .icon { width: 17px; height: 17px; }
+
 
 /* Sidebar lists: Shop by / Categories / Age & Stage */
 .snav { margin-top: 18px; }
@@ -536,6 +533,163 @@ body.is-filtering { overflow: hidden; }
   .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
+
+
+/* =====================================================================
+   Visual polish (storefront page only — sheets, cart, checkout unchanged)
+   ===================================================================== */
+/* Page background: a very soft lilac -> cream -> blush wash, two faint pastel glows at the top */
+body { background-color: #F8F4FB; background-image: linear-gradient(180deg, #F7F2FC 0%, #FBF8F3 42%, #FCF2F6 100%); min-height: 100vh; }
+body::before, body::after { content: ''; position: absolute; z-index: -1; pointer-events: none; border-radius: 50%; }
+body::before, body::after { border-radius: 0; }      /* glows stay inside the page width: no sideways scroll */
+/* (each glow fades out completely inside its own box, so no edge is ever visible) */
+body::before { top: 0; right: 0; width: min(360px, 90vw); height: 340px; background: radial-gradient(closest-side at 70% 30%, rgba(244, 175, 200, .30), rgba(244, 175, 200, 0)); }
+body::after { top: 60px; left: 0; width: min(340px, 85vw); height: 380px; background: radial-gradient(closest-side at 30% 50%, rgba(215, 201, 244, .36), rgba(215, 201, 244, 0)); }
+@media print { body::before, body::after { display: none; } }
+
+.wrap { padding: 12px 16px calc(120px + var(--safe-b)); }
+
+/* Store header (phones): compact, name on one line */
+.store__top { gap: 12px; min-height: 56px; }
+.store__logo-btn { flex: none; padding: 0; border: 0; background: none; border-radius: 16px; }
+.store__logo-btn .store__logo { width: 52px; height: 52px; border-radius: 16px; }
+.store__logo--mark { font-size: 20px; }
+.store__name { font-weight: 700; font-size: clamp(17px, 5vw, 22px); line-height: 1.15; letter-spacing: -.005em; overflow-wrap: normal; min-width: 0; }
+.store__home { display: block; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; letter-spacing: inherit; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.status { margin-top: 4px; padding: 2px 9px 2px 7px; font-size: 12px; }
+.status::before { width: 7px; height: 7px; }
+.cart-btn { width: 44px; height: 44px; border-radius: 14px; }
+
+/* Secondary actions: WhatsApp Store + My Orders */
+.acts { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 8px; }
+.store__actions { margin-top: 8px; }
+/* Secondary actions — never styled like a main call to action */
+.act { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 34px; padding: 0 12px; border-radius: 999px; font-family: var(--font-body); font-size: 13px; line-height: 1; text-decoration: none; white-space: nowrap; transition: transform .1s, background .15s, border-color .15s; }
+.act .icon { width: 16px; height: 16px; }
+.act:active { transform: scale(.97); }
+.act--wa { background: rgba(255, 255, 255, .45); border: 1px solid rgba(232, 227, 242, .9); color: var(--ink-2); font-weight: 500; }
+.act--wa .icon { color: #3FA884; }
+.act--orders { background: rgba(244, 239, 252, .9); border: 1px solid var(--lilac-200); color: var(--purple-deep); font-weight: 600; }
+.act--wa:hover { border-color: var(--lilac-200); }
+.act--orders:hover { background: var(--lilac-100); }
+
+/* Store description: soft speech bubble (full text) */
+.bubble { position: relative; margin-top: 12px; padding: 12px 16px; border: 1px solid #F1E2EC; border-radius: 20px; background: linear-gradient(160deg, #FFF9F2, #FDF1F6); box-shadow: 0 1px 6px rgba(176, 71, 122, .05); color: var(--ink-2); font-family: var(--font-display); font-weight: 400; font-size: 14.5px; line-height: 1.4; white-space: pre-line; overflow-wrap: anywhere; }
+.bubble::before { content: ''; position: absolute; top: -7px; left: 22px; width: 12px; height: 12px; background: #FFF9F2; border-left: 1px solid #F1E2EC; border-top: 1px solid #F1E2EC; border-radius: 3px 0 0 0; transform: rotate(45deg); }
+
+/* Store announcement: soft cloud (CSS shape: rounded body + three puffs on top) */
+.cloud { position: relative; display: flex; align-items: flex-start; gap: 12px; margin-top: 28px; padding: 14px 18px; border: 1px solid #E8DCF6; border-radius: 26px; background: linear-gradient(135deg, #F6F0FE, #FBF0F7); box-shadow: 0 2px 10px rgba(114, 86, 201, .06); color: var(--ink); font-family: var(--font-display); font-weight: 500; font-size: 14.5px; line-height: 1.4; }
+.cloud::before, .cloud::after, .cloud__puff { content: ''; position: absolute; bottom: calc(100% - 1px); border: 1px solid #E8DCF6; border-bottom: 0; border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+.cloud::before { left: 18px; width: 46px; height: 21px; background: #F6F0FE; }
+.cloud::after { left: 54px; width: 32px; height: 14px; background: #F7F0FD; }
+.cloud__puff { right: 30px; width: 40px; height: 17px; background: #FAF0F8; }
+.cloud__icon { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #fff; color: var(--purple-deep); box-shadow: 0 1px 4px rgba(114, 86, 201, .12); }
+.cloud__icon .icon { width: 17px; height: 17px; }
+.cloud__text { flex: 1; min-width: 0; padding-top: 4px; white-space: pre-line; overflow-wrap: anywhere; }
+
+/* Banner: a promotional highlight, never cropped (full picture over a soft blurred copy) */
+.hero { margin-top: 16px; aspect-ratio: 16 / 7.5; border-radius: 20px; isolation: isolate; }
+.hero .hero__bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(22px) saturate(1.1); transform: scale(1.2); opacity: .55; z-index: -1; }
+.hero .hero__img { position: relative; width: 100%; height: 100%; object-fit: contain; }
+
+/* Search + Filter */
+.toolbar { margin-top: 18px; }
+.search .input { min-height: 48px; }
+.filter-btn { min-height: 48px; padding: 0 14px; }
+.filter-btn::after { content: ''; position: absolute; inset: -2px; border-radius: inherit; pointer-events: none; opacity: 0; }
+.filter-btn.is-nudged { background: var(--lilac-50); border-color: var(--lilac-200); transition: background .3s, border-color .3s; }
+.filter-btn.is-nudged::after { animation: filter-nudge 1.2s ease-out 1 both; }
+@keyframes filter-nudge {
+  0%   { opacity: 1; box-shadow: 0 0 0 0 rgba(114, 86, 201, .42); }
+  70%  { opacity: 1; box-shadow: 0 0 0 10px rgba(114, 86, 201, 0); }
+  100% { opacity: 0; box-shadow: 0 0 0 12px rgba(114, 86, 201, 0); }
+}
+.filter-help { margin: 5px 6px 0 0; text-align: right; font-family: var(--font-display); font-weight: 400; font-size: 12px; line-height: 1.3; color: #716B95; }
+
+/* Product type (segmented) + Shop by chips */
+.m-types { margin-top: 8px; }
+.type { min-height: 40px; font-family: var(--font-display); font-weight: 500; font-size: 14px; letter-spacing: .04em; }
+.qchips { margin-top: 10px; }
+.qchip { min-height: 40px; }
+.chips { margin-top: 14px; }
+
+/* Section heading with a soft accent bar */
+.section-title { margin: 20px 0 12px; font-size: 22px; align-items: center; }
+.section-title__t { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
+.section-title__t::before { content: ''; flex: none; width: 4px; height: 1.05em; border-radius: 4px; background: linear-gradient(180deg, var(--blush-deep), var(--purple)); }
+.section-title small { color: var(--ink-3); }
+
+/* Desktop store card */
+.brand__name { font-weight: 700; font-size: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; overflow-wrap: normal; }
+.brand__name .fit-name { display: block; width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.brand .bubble { margin-top: 16px; text-align: left; font-size: 14px; }
+.brand .bubble::before { left: calc(50% - 6px); }
+.brand__actions { margin-top: 12px; grid-template-columns: 1fr; gap: 6px; }    /* stacked: the sidebar is narrow */
+
+@media (min-width: 960px) {
+  .wrap { max-width: 1328px; padding: 24px 24px calc(120px + var(--safe-b)); }
+  .shop { grid-template-columns: 280px minmax(0, 1fr); gap: 24px; }
+  .cloud { margin-top: 26px; }
+  .hero { margin-top: 16px; aspect-ratio: 3 / 1; max-height: 280px; border-radius: 22px; }
+  .section-title { margin-top: 24px; font-size: 26px; }
+  .grid { gap: 16px; }
+}
+@media (min-width: 960px) and (max-width: 1199.98px) {
+  .wrap { padding-left: 20px; padding-right: 20px; }
+  .shop { grid-template-columns: 248px minmax(0, 1fr); gap: 20px; }
+  .grid { gap: 14px; }
+}
+
+/* Shop by row: ‹ › scroll buttons (phones) */
+.qrow { position: relative; }
+.qrow .qchips { scroll-padding-inline: 16px 52px; padding-right: 52px; }
+.qnav { position: absolute; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 1px solid var(--lilac-200); border-radius: 50%; background: rgba(255, 255, 255, .94); color: var(--purple-deep); box-shadow: 0 2px 8px rgba(114, 86, 201, .16); z-index: 2; transition: opacity .15s; }
+.qnav .icon { width: 18px; height: 18px; stroke-width: 2.2; }
+.qnav--next { right: -6px; box-shadow: 0 2px 8px rgba(114, 86, 201, .16), -14px 0 14px 4px rgba(248, 244, 251, .92); }   /* soft fade over the chip behind */
+.qnav--prev { left: -6px; box-shadow: 0 2px 8px rgba(114, 86, 201, .16), 14px 0 14px 4px rgba(248, 244, 251, .92); }
+.qnav:active { transform: translateY(-50%) scale(.94); }
+.qnav[hidden] { display: none; }
+
+/* First-visit guide — steps B and C share the look of step A (purple, Fredoka, soft shadow) */
+.tip { position: relative; margin-top: 12px; border-radius: 22px; font-family: var(--font-display); line-height: 1.3; animation: tip-in .3s cubic-bezier(.2, .9, .3, 1.2) both; }
+.tip::before { content: ''; position: absolute; top: -6px; width: 14px; height: 14px; border-radius: 3px 0 0 0; transform: rotate(45deg); }
+@keyframes tip-in { from { opacity: 0; transform: translateY(-6px) scale(.97); } }
+.tip[hidden] { display: none; }
+.tip__title { font-weight: 700; font-size: 16.5px; letter-spacing: .04em; }
+
+/* Step B: Filter */
+.tip--filter { display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 18px; margin-left: 0; width: auto; background: linear-gradient(135deg, var(--purple), var(--purple-deep)); color: #fff; box-shadow: 0 10px 26px rgba(91, 65, 175, .32), 0 2px 6px rgba(91, 65, 175, .2); }
+.tip--filter::before { right: 44px; background: var(--purple); }
+.tip__txt { flex: 1; min-width: 0; }
+.tip__desc { margin-top: 2px; font-weight: 500; font-size: 13.5px; opacity: .95; }
+.tip__ok { flex: none; min-height: 38px; padding: 0 16px; border: 0; border-radius: 999px; background: #FFF8EC; color: var(--purple-deep); font-family: var(--font-display); font-weight: 600; font-size: 13.5px; letter-spacing: .05em; box-shadow: 0 2px 6px rgba(30, 20, 80, .15); }
+.tip__ok:active { transform: scale(.96); }
+
+/* Step C: Shop by */
+.tip--shopby { overflow: visible; padding: 0; background: #fff; border: 1px solid var(--lilac-200); box-shadow: 0 10px 26px rgba(91, 65, 175, .22), 0 2px 6px rgba(91, 65, 175, .12); }
+.tip--shopby::before { left: 34px; background: var(--purple); }
+.tip__head { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 11px 10px 11px 18px; border-radius: 21px 21px 0 0; background: linear-gradient(135deg, var(--purple), var(--purple-deep)); color: #fff; }
+.tip__x { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: rgba(255, 255, 255, .2); color: #fff; }
+.tip__x .icon { width: 16px; height: 16px; stroke-width: 2.2; }
+.tip__list { display: grid; gap: 7px; margin: 0; padding: 12px 16px 14px; list-style: none; font-family: var(--font-body); font-size: 13.5px; line-height: 1.35; color: var(--ink); }
+.tip__list li { display: flex; align-items: center; gap: 10px; }
+.tip__list b { font-weight: 700; }
+.tip__ic { display: grid; place-items: center; width: 26px; height: 26px; flex: none; border-radius: 9px; background: var(--tile-bg); color: var(--tile-ink); }
+.tip__ic .icon { width: 15px; height: 15px; }
+
+/* First-visit floating CTA: LIHAT PRODUK / Scroll ke bawah — high enough to clear browser bars */
+.scroll-pill { position: fixed; left: 50%; bottom: max(100px, calc(env(safe-area-inset-bottom, 0px) + 80px)); z-index: 14; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; width: 196px; max-width: calc(100vw - 32px); min-height: 56px; padding: 7px 18px; border: 0; border-radius: 999px; background: linear-gradient(135deg, var(--purple), var(--purple-deep)); color: #fff; font-family: var(--font-display); line-height: 1.15; box-shadow: 0 10px 26px rgba(91, 65, 175, .38), 0 2px 6px rgba(91, 65, 175, .25); opacity: 0; transform: translateX(-50%) scale(.9); transition: opacity .25s; }
+.scroll-pill.is-in { opacity: 1; transform: translateX(-50%); animation: cta-pop .5s cubic-bezier(.2, .9, .3, 1.3) both, cta-bounce .7s ease-in-out .55s 2; }
+.scroll-pill[hidden] { display: none; }
+.scroll-pill__main { font-weight: 700; font-size: 16.5px; letter-spacing: .04em; }
+.scroll-pill__sub { display: inline-flex; align-items: center; gap: 3px; font-weight: 500; font-size: 11.5px; opacity: .92; }
+.scroll-pill__sub .icon { width: 13px; height: 13px; stroke-width: 2.4; animation: pill-nudge 1.2s ease-in-out 1.6s 3; }
+.scroll-pill:active { filter: brightness(.95); }
+@keyframes cta-pop { from { opacity: 0; transform: translateX(-50%) scale(.85); } to { opacity: 1; transform: translateX(-50%) scale(1); } }
+@keyframes cta-bounce { 0%, 100% { transform: translateX(-50%); } 40% { transform: translate(-50%, -7px); } }
+@keyframes pill-nudge { 50% { transform: translateY(2px); } }
+@media (prefers-reduced-motion: reduce) { .scroll-pill.is-in, .scroll-pill__sub .icon { animation: none !important; transform: translateX(-50%); } .scroll-pill__sub .icon { transform: none; } }
+@media (min-width: 960px) { .tip, .scroll-pill, .qnav { display: none !important; } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
@@ -668,7 +822,8 @@ const ICONS = {
   blocks: '<rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/><rect x="8.5" y="4" width="7" height="7" rx="1.5"/>',
   pencil: '<path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="m14 7 3 3"/>',
   cap: '<path d="m2 9 10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5M22 9v5"/>',
-  play: '<path d="M8 5.5v13l11-6.5z"/>'
+  play: '<path d="M8 5.5v13l11-6.5z"/>',
+  down: '<path d="m6 9 6 6 6-6"/>'
 };
 function icon(name) {
   return `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ''}</svg>`;
@@ -947,9 +1102,16 @@ function renderPage() {
     ? `<img class="store__logo" src="${esc(s.logo_url)}" alt="">`
     : `<div class="store__logo store__logo--mark" aria-hidden="true">${esc(initials)}</div>`;
   const status = `<span class="status ${isOpen() ? '' : 'status--closed'}">${isOpen() ? 'Open for Orders' : 'Closed for Orders'}</span>`;
-  const whatsapp = s.whatsapp_number ? `<a class="btn btn--mint btn--sm" target="_blank" rel="noopener"
-      href="${esc(waLink(s.whatsapp_number, `Hi ${name}, saya ada pertanyaan.`))}">${icon('chat')} WhatsApp Store</a>` : '';
-  const orders = `<button class="btn btn--ghost btn--sm" data-action="open-orders">${icon('receipt')} My Orders</button>`;
+  // Secondary actions (both pages): My Orders a little stronger than WhatsApp.
+  const whatsapp = s.whatsapp_number ? `<a class="act act--wa" target="_blank" rel="noopener"
+      href="${esc(waLink(s.whatsapp_number, `Hi ${name}, saya ada pertanyaan.`))}">${icon('chat')}<span>WhatsApp Store</span></a>` : '';
+  const orders = `<button class="act act--orders" data-action="open-orders">${icon('receipt')}<span>My Orders</span></button>`;
+  // Store description: a soft speech bubble. Announcement: a soft cloud. Full text, never cut.
+  const bubble = s.store_description ? `<p class="bubble">${esc(s.store_description)}</p>` : '';
+  const cloud = extra => s.announcement ? `<div class="cloud ${extra}" role="note">
+      <span class="cloud__puff" aria-hidden="true"></span>
+      <span class="cloud__icon" aria-hidden="true">${icon('megaphone')}</span>
+      <p class="cloud__text">${esc(s.announcement)}</p></div>` : '';
   const cartButton = extra => `<button class="cart-btn ${extra}" data-action="open-cart" aria-label="Open cart">
       ${icon('bag')}<span class="cart-btn__count num" hidden>0</span></button>`;
   // Two copies of the store header exist: one in the desktop sidebar, one on top of the
@@ -966,10 +1128,10 @@ function renderPage() {
         <div class="side__body">
           <div class="brand only-desktop">
             ${logo}
-            <h1 class="brand__name">${esc(name)}</h1>
+            <h1 class="brand__name"><span class="fit-name">${esc(name)}</span></h1>
             ${status}
-            ${s.store_description ? `<p class="brand__desc">${esc(s.store_description)}</p>` : ''}
-            <div class="brand__actions">${whatsapp}${orders}</div>
+            ${bubble}
+            <div class="acts brand__actions">${whatsapp}${orders}</div>
           </div>
           <div class="types only-desktop" id="type-tabs" role="group" aria-label="Product type"></div>
           <nav class="snav only-desktop" aria-labelledby="snav-group"><p class="snav__h" id="snav-group">Shop by</p><div class="snav__list" id="curated-list"></div></nav>
@@ -985,22 +1147,23 @@ function renderPage() {
       <div class="shop__main">
         <header class="store only-mobile">
           <div class="store__top">
-            ${logo}
+            <!-- Tapping the logo or the store name = HOME: scroll to Search + Filter (phones only) -->
+            <button class="store__logo-btn" data-action="go-home" aria-label="${esc(name)} — go to products">${logo}</button>
             <div class="store__id">
-              <h1 class="store__name">${esc(name)}</h1>
+              <h1 class="store__name"><button class="store__home fit-name" data-action="go-home">${esc(name)}</button></h1>
               ${status}
             </div>
             ${cartButton('')}
           </div>
-          ${s.store_description ? `<p class="store__desc">${esc(s.store_description)}</p>` : ''}
-          ${s.announcement ? `<div class="announce">${icon('megaphone')}<span>${esc(s.announcement)}</span></div>` : ''}
-          <div class="store__actions">${whatsapp}${orders}</div>
+          <div class="acts store__actions">${whatsapp}${orders}</div>
+          ${bubble}
+          ${cloud('')}
         </header>
-        ${s.announcement ? `<div class="announce only-desktop">${icon('megaphone')}<span>${esc(s.announcement)}</span></div>` : ''}
+        ${cloud('only-desktop')}
 
         <div class="hero">
           ${s.banner_url
-            ? `<img src="${esc(s.banner_url)}" alt="">`
+            ? `<img class="hero__bg" src="${esc(s.banner_url)}" alt=""><img class="hero__img" src="${esc(s.banner_url)}" alt="">`
             : `<div class="hero__cards" aria-hidden="true"><i></i><i></i><i></i><i></i></div>`}
         </div>
 
@@ -1014,16 +1177,87 @@ function renderPage() {
           </button>
           ${cartButton('only-desktop')}
         </div>
+        <p class="filter-help only-mobile">Tapis ikut kategori &amp; umur</p>
+        <!-- first visit only (phones): step 2 of the guide -->
+        <div class="tip tip--filter only-mobile" id="tip-filter" role="note" hidden>
+          <div class="tip__txt"><p class="tip__title">FILTER PRODUK</p><p class="tip__desc">Tapis ikut kategori &amp; umur anak</p></div>
+          <button type="button" class="tip__ok" data-action="tip-ok">FAHAM</button>
+        </div>
         <!-- phones / tablets only: product type + Shop by stay on the page (on desktop they are in the sidebar) -->
         <div class="types m-types only-mobile" id="type-tabs-m" role="group" aria-label="Product type"></div>
-        <div class="qchips only-mobile" id="curated-chips" role="group" aria-label="Shop by"></div>
+        <div class="qrow only-mobile">
+          <div class="qchips" id="curated-chips" role="group" aria-label="Shop by"></div>
+          <button type="button" class="qnav qnav--prev" id="qnav-prev" data-action="qnav" data-dir="-1" aria-label="Scroll pilihan ke kiri" hidden>${icon('left')}</button>
+          <button type="button" class="qnav qnav--next" id="qnav-next" data-action="qnav" data-dir="1" aria-label="Scroll pilihan ke kanan" hidden>${icon('right')}</button>
+        </div>
+        <!-- first visit only (phones): step 3 of the guide -->
+        <div class="tip tip--shopby only-mobile" id="tip-shopby" role="note" hidden>
+          <div class="tip__head"><p class="tip__title">PILIH IKUT KEPERLUAN</p>
+            <button type="button" class="tip__x" data-action="tip-close" aria-label="Tutup panduan">${icon('x')}</button></div>
+          <ul class="tip__list">
+            ${SHOP_BY_HELP.map(([key, label, text], i) => `<li><span class="tip__ic tone-${[4, 0, 2, 3][i]}" aria-hidden="true">${icon(CURATED.find(c => c[0] === key)[3])}</span><span><b>${label}</b> — ${text}</span></li>`).join('')}
+          </ul>
+        </div>
         <div class="chips" id="active-filters" aria-label="Active filters"></div>
+        <button type="button" class="scroll-pill" id="scroll-pill" data-action="pill-go" hidden>
+          <span class="scroll-pill__main">LIHAT PRODUK</span><span class="scroll-pill__sub">Scroll ke bawah ${icon('down')}</span></button>
         <div id="catalog"></div>
         <p class="footer">© ${new Date().getFullYear()} ${esc(name)}</p>
       </div>
     </div>`;
   renderCatalog();
   renderCartBadges();
+  fitStoreNames();
+  $('#curated-chips').addEventListener('scroll', syncShopByNav, { passive: true });
+  syncShopByNav();
+  startFirstVisitGuide();
+}
+/* The store name stays on ONE line: if it does not fit, its font gets a little smaller
+   (down to 15px). Only a name that still does not fit then ends with "…". */
+function fitStoreNames() {
+  $$('.fit-name').forEach(el => {
+    el.style.fontSize = '';
+    if (!el.offsetParent) return;                         // hidden copy (other layout)
+    let size = parseFloat(getComputedStyle(el).fontSize);
+    while (el.scrollWidth > el.clientWidth + 1 && size > 15) {
+      size -= 0.5;
+      el.style.fontSize = size + 'px';
+    }
+  });
+}
+let fitTimer = 0;
+window.addEventListener('resize', () => { clearTimeout(fitTimer); fitTimer = setTimeout(fitStoreNames, 120); });
+/* HOME (phones only): tapping the logo or the store name scrolls to Search + Filter and
+   gives the Filter button one soft pulse. Nothing else ever scrolls or pulses: closing a
+   product, the cart or My Orders, or coming back from a link leaves the page where it was.
+   The filter drawer is never opened by this — only by tapping Filter. */
+const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)');
+function goHome() {
+  if (DESKTOP.matches) return;
+  const bar = $('.toolbar');
+  if (!bar) return;
+  const top = Math.max(0, bar.getBoundingClientRect().top + window.scrollY - 12);
+  window.scrollTo({ top, behavior: REDUCED_MOTION.matches ? 'auto' : 'smooth' });
+  afterScrollSettles(() => {
+    const btn = $('#filter-btn');
+    if (!btn) return;
+    btn.classList.remove('is-nudged');
+    void btn.offsetWidth;                                 // restart the one-time pulse
+    btn.classList.add('is-nudged');
+    setTimeout(() => btn.classList.remove('is-nudged'), 1300);
+  });
+}
+function afterScrollSettles(done) {
+  let last = -1, still = 0;
+  const started = performance.now();
+  const tick = () => {
+    const y = window.scrollY;
+    still = Math.abs(y - last) < 0.5 ? still + 1 : 0;
+    last = y;
+    if (still >= 5 || performance.now() - started > 1500) return done();
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
 }
 /*
  * Five filters, and they all combine:
@@ -1107,7 +1341,7 @@ function renderCatalog() {
   // tapping the chip that is on again switches it off = All Products.
   $('#curated-chips').innerHTML = CURATED.slice(1).map(([key, label, test, ic], i) => {
     const on = curated[0] === key;
-    return `<button class="qchip ${on ? 'is-active' : ''}" data-action="curated" data-group="${on ? 'all' : key}" data-k="qchip:${key}" aria-pressed="${on}">
+    return `<button class="qchip ${on ? 'is-active' : ''}" data-action="curated" data-group="${on ? 'all' : key}" data-k="qchip:${key}" aria-pressed="${on}" title="${esc(SHOP_BY_MEANING[key] || '')}">
       <span class="tone-${[4, 0, 2, 3][i]}" aria-hidden="true">${icon(ic)}</span>${label} <span class="qchip__n num">${all.filter(test).length}</span></button>`;
   }).join('');
   const inGroup = all.filter(curated[2]);
@@ -1187,12 +1421,116 @@ function renderCatalog() {
               <button class="btn btn--ghost btn--sm" data-action="clear-filter">Show all products</button></div>`;
   }
   $('#catalog').innerHTML = `
-    ${featured.length ? `<h2 class="section-title">Featured Products</h2><div class="rail">${featured.map(productCard).join('')}</div>` : ''}
-    <h2 class="section-title">${esc(heading)} <small>${list.length} item${list.length === 1 ? '' : 's'}</small></h2>
+    ${featured.length ? `<h2 class="section-title"><span class="section-title__t">Featured Products</span></h2><div class="rail">${featured.map(productCard).join('')}</div>` : ''}
+    <h2 class="section-title"><span class="section-title__t">${esc(heading)}</span> <small>${list.length} item${list.length === 1 ? '' : 's'}</small></h2>
     <div class="grid">${grid}</div>`;
 
   if (focusKey) $$('#app [data-k]').find(el => el.dataset.k === focusKey)?.focus();
+  syncShopByNav();
 }
+
+/* ----- Shop by: meanings + the ‹ › buttons of the sideways row (phones) ----- */
+const SHOP_BY_MEANING = {
+  main: 'Produk utama NPrecious.',
+  popular: 'Terhangat & paling laris.',
+  best: 'Produk yang paling berbaloi dimiliki.',
+  free: 'Dapatkan akses percuma untuk produk terpilih kami.'
+};
+const SHOP_BY_HELP = [
+  ['main', 'Main Product', 'Produk utama NPrecious'],
+  ['popular', 'Popular', 'Terhangat &amp; paling laris'],
+  ['best', 'Best Value', 'Paling berbaloi dimiliki'],
+  ['free', 'FREE', 'Akses percuma produk terpilih']
+];
+/* › shows while there is more of the row to the right; ‹ once the row has moved right. */
+function syncShopByNav() {
+  const row = $('#curated-chips'), next = $('#qnav-next'), prev = $('#qnav-prev');
+  if (!row || !next || !prev) return;
+  const max = row.scrollWidth - row.clientWidth;
+  next.hidden = !(max > 4 && row.scrollLeft < max - 4);
+  prev.hidden = !(max > 4 && row.scrollLeft > 4);
+}
+function scrollShopBy(dir) {
+  const row = $('#curated-chips');
+  if (!row) return;
+  // Only the row moves (never the page) and nothing is selected.
+  row.scrollBy({ left: dir * Math.max(120, row.clientWidth * 0.6), behavior: REDUCED_MOTION.matches ? 'auto' : 'smooth' });
+}
+window.addEventListener('resize', () => syncShopByNav());
+
+/* ----- First-visit guide (phones only, once) -----
+   1. a small "Scroll untuk lihat produk" pill at the bottom, until the visitor scrolls
+   2. when Search + Filter come into view: a tip under Filter ("Faham" / tap Filter)
+   3. then a short Shop by guide under the chips (tap a chip, ✕, or scroll on)
+   Nothing is ever blocked or opened for the visitor; the filter drawer only opens on
+   a tap on Filter. Only a small "seen" mark is kept in this browser (localStorage). */
+const GUIDE_KEY = 'np_guide_seen';
+const guide = { step: 0, shopbyAt: 0 };
+function startFirstVisitGuide() {
+  if (DESKTOP.matches || readStore(GUIDE_KEY, false) || deepLinkSlug()) return;
+  writeStore(GUIDE_KEY, true);                               // first visit: shown this once only
+  guide.step = 1;
+  const bar = $('.toolbar');
+  // Search + Filter already in the upper half of the screen: no CTA needed.
+  if (bar.getBoundingClientRect().top < window.innerHeight * 0.45) return showFilterTip();
+  const pill = $('#scroll-pill');
+  pill.hidden = false;
+  placePill();
+  requestAnimationFrame(() => pill.classList.add('is-in'));
+  guide.pillTimer = setTimeout(hidePill, 9000);
+}
+/* The CTA sits ~100px above the bottom; if Search + Filter are on screen right there,
+   it moves up to sit just above them, so it never covers them. */
+function placePill() {
+  const pill = $('#scroll-pill'), bar = $('.toolbar');
+  if (!pill || pill.hidden || !bar) return;
+  pill.style.bottom = '';
+  const pr = pill.getBoundingClientRect(), br = bar.getBoundingClientRect();
+  if (pr.bottom > br.top - 12 && pr.top < br.bottom + 12) pill.style.bottom = Math.round(window.innerHeight - br.top + 14) + 'px';
+}
+function hidePill() {
+  clearTimeout(guide.pillTimer);
+  const pill = $('#scroll-pill');
+  if (pill && !pill.hidden) { pill.classList.remove('is-in'); setTimeout(() => { pill.hidden = true; }, 250); }
+}
+function showFilterTip() {
+  hidePill();
+  if (guide.step >= 2) return;
+  guide.step = 2;
+  $('#tip-filter').hidden = false;
+}
+function endFilterTip(next) {
+  if (guide.step !== 2) return;
+  $('#tip-filter').hidden = true;
+  guide.step = next ? 3 : 4;
+  if (next) showShopByTip();
+}
+function showShopByTip() {
+  if (DESKTOP.matches) return;
+  $('#tip-shopby').hidden = false;
+  guide.shopbyAt = window.scrollY;
+}
+function endShopByTip() {
+  if (guide.step !== 3) return;
+  guide.step = 4;
+  $('#tip-shopby').hidden = true;
+}
+function guideOnScroll() {
+  if (!guide.step || guide.step >= 4) return;
+  if (guide.step === 1) {
+    if (window.scrollY > 90) hidePill(); else placePill();
+    const r = $('.toolbar')?.getBoundingClientRect();
+    if (r && r.top >= 0 && r.top < window.innerHeight * 0.75) showFilterTip();
+    else if (r && r.bottom < -40) { hidePill(); guide.step = 4; }       // flew past Search: the visitor is browsing
+  } else if (guide.step === 2) {
+    const r = $('.toolbar').getBoundingClientRect();
+    if (r.bottom < -40) endFilterTip(false);                 // scrolled well past it: the visitor is browsing
+  } else if (guide.step === 3) {
+    if (window.scrollY - guide.shopbyAt > 160) endShopByTip();
+  }
+}
+window.addEventListener('scroll', guideOnScroll, { passive: true });
+
 /* Filter drawer (phones and tablets; on desktop the sidebar is always shown). */
 const DESKTOP = window.matchMedia('(min-width: 960px)');
 function openFilters() {
@@ -1205,6 +1543,7 @@ function openFilters() {
 function closeFilters() {
   const shop = $('#shop');
   if (!shop || !shop.classList.contains('is-filtering')) return;
+  if (guide.step === 2.5) { guide.step = 3; setTimeout(showShopByTip, 320); }
   const hadFocus = shop.querySelector('#filters').contains(document.activeElement);
   shop.classList.remove('is-filtering');
   document.body.classList.remove('is-filtering');
@@ -2044,15 +2383,23 @@ window.addEventListener('afterprint', () => { $('#print-root').innerHTML = ''; }
 const actions = {
   'close-sheet': el => closeSheet(el.closest('.sheet')),
   'reload': () => start(),
-  'curated': el => { state.filter.group = el.dataset.group; renderCatalog(); },
+  'curated': el => { endShopByTip(); state.filter.group = el.dataset.group; renderCatalog(); },
   'type': el => { state.filter.type = el.dataset.type; renderCatalog(); },
   'category': el => { state.filter.category = el.dataset.id; renderCatalog(); },
   'stage': el => { state.filter.stage = el.dataset.stage; renderCatalog(); },
   'clear-one': el => { state.filter[el.dataset.key] = 'all'; renderCatalog(); $('#search').focus({ preventScroll: true }); },
   'clear-filter': () => { state.filter = { group: 'all', type: 'all', category: 'all', stage: 'all', q: '' }; $('#search').value = ''; renderCatalog(); },
   'clear-drawer': () => { state.filter.category = 'all'; state.filter.stage = 'all'; renderCatalog(); },
-  'open-filters': () => openFilters(),
+  'open-filters': () => {
+    if (guide.step === 2) { $('#tip-filter').hidden = true; guide.step = 2.5; }   // guide: Shop by tip comes after the drawer
+    openFilters();
+  },
+  'tip-ok': () => endFilterTip(true),
+  'tip-close': () => endShopByTip(),
+  'pill-go': () => { hidePill(); goHome(); },
+  'qnav': el => scrollShopBy(Number(el.dataset.dir)),
   'close-filters': () => closeFilters(),
+  'go-home': () => goHome(),
   'open-product': el => openProduct(el.dataset.id),
   'gallery-step': el => galleryGo(state.detail.index + Number(el.dataset.dir)),
   'gallery-go': el => galleryGo(Number(el.dataset.index)),
