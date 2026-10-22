@@ -670,11 +670,18 @@ body::after { top: 60px; left: 0; width: min(340px, 85vw); height: 380px; backgr
 .tip__ic { display: grid; place-items: center; width: 26px; height: 26px; flex: none; border-radius: 9px; background: var(--tile-bg); color: var(--tile-ink); }
 .tip__ic .icon { width: 15px; height: 15px; }
 
-.scroll-pill { position: fixed; left: 50%; bottom: calc(18px + var(--safe-b)); z-index: 14; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 16px; border: 1px solid var(--lilac-200); border-radius: 999px; background: rgba(255, 255, 255, .96); color: var(--purple-deep); font-weight: 700; font-size: 13.5px; box-shadow: 0 6px 20px rgba(114, 86, 201, .2); transform: translate(-50%, 12px); opacity: 0; transition: transform .25s, opacity .25s; }
-.scroll-pill.is-in { transform: translate(-50%, 0); opacity: 1; }
+/* First-visit floating CTA: LIHAT PRODUK / Scroll ke bawah — high enough to clear browser bars */
+.scroll-pill { position: fixed; left: 50%; bottom: max(100px, calc(env(safe-area-inset-bottom, 0px) + 80px)); z-index: 14; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; width: 196px; max-width: calc(100vw - 32px); min-height: 56px; padding: 7px 18px; border: 0; border-radius: 999px; background: linear-gradient(135deg, var(--purple), var(--purple-deep)); color: #fff; font-family: var(--font-display); line-height: 1.15; box-shadow: 0 10px 26px rgba(91, 65, 175, .38), 0 2px 6px rgba(91, 65, 175, .25); opacity: 0; transform: translateX(-50%) scale(.9); transition: opacity .25s; }
+.scroll-pill.is-in { opacity: 1; transform: translateX(-50%); animation: cta-pop .5s cubic-bezier(.2, .9, .3, 1.3) both, cta-bounce .7s ease-in-out .55s 2; }
 .scroll-pill[hidden] { display: none; }
-.scroll-pill .icon { width: 18px; height: 18px; animation: pill-nudge 1.4s ease-in-out infinite; }
-@keyframes pill-nudge { 50% { transform: translateY(3px); } }
+.scroll-pill__main { font-weight: 700; font-size: 16.5px; letter-spacing: .04em; }
+.scroll-pill__sub { display: inline-flex; align-items: center; gap: 3px; font-weight: 500; font-size: 11.5px; opacity: .92; }
+.scroll-pill__sub .icon { width: 13px; height: 13px; stroke-width: 2.4; animation: pill-nudge 1.2s ease-in-out 1.6s 3; }
+.scroll-pill:active { filter: brightness(.95); }
+@keyframes cta-pop { from { opacity: 0; transform: translateX(-50%) scale(.85); } to { opacity: 1; transform: translateX(-50%) scale(1); } }
+@keyframes cta-bounce { 0%, 100% { transform: translateX(-50%); } 40% { transform: translate(-50%, -7px); } }
+@keyframes pill-nudge { 50% { transform: translateY(2px); } }
+@media (prefers-reduced-motion: reduce) { .scroll-pill.is-in, .scroll-pill__sub .icon { animation: none !important; transform: translateX(-50%); } .scroll-pill__sub .icon { transform: none; } }
 @media (min-width: 960px) { .tip, .scroll-pill, .qnav { display: none !important; } }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1185,7 +1192,8 @@ function renderPage() {
           </ul>
         </div>
         <div class="chips" id="active-filters" aria-label="Active filters"></div>
-        <button type="button" class="scroll-pill" id="scroll-pill" data-action="pill-go" hidden>Scroll untuk lihat produk ${icon('down')}</button>
+        <button type="button" class="scroll-pill" id="scroll-pill" data-action="pill-go" hidden>
+          <span class="scroll-pill__main">LIHAT PRODUK</span><span class="scroll-pill__sub">Scroll ke bawah ${icon('down')}</span></button>
         <div id="catalog"></div>
         <p class="footer">© ${new Date().getFullYear()} ${esc(name)}</p>
       </div>
@@ -1456,11 +1464,22 @@ function startFirstVisitGuide() {
   writeStore(GUIDE_KEY, true);                               // first visit: shown this once only
   guide.step = 1;
   const bar = $('.toolbar');
-  if (bar.getBoundingClientRect().top < window.innerHeight * 0.75) return showFilterTip();   // already in view
+  // Search + Filter already in the upper half of the screen: no CTA needed.
+  if (bar.getBoundingClientRect().top < window.innerHeight * 0.45) return showFilterTip();
   const pill = $('#scroll-pill');
   pill.hidden = false;
+  placePill();
   requestAnimationFrame(() => pill.classList.add('is-in'));
-  guide.pillTimer = setTimeout(hidePill, 6000);
+  guide.pillTimer = setTimeout(hidePill, 9000);
+}
+/* The CTA sits ~100px above the bottom; if Search + Filter are on screen right there,
+   it moves up to sit just above them, so it never covers them. */
+function placePill() {
+  const pill = $('#scroll-pill'), bar = $('.toolbar');
+  if (!pill || pill.hidden || !bar) return;
+  pill.style.bottom = '';
+  const pr = pill.getBoundingClientRect(), br = bar.getBoundingClientRect();
+  if (pr.bottom > br.top - 12 && pr.top < br.bottom + 12) pill.style.bottom = Math.round(window.innerHeight - br.top + 14) + 'px';
 }
 function hidePill() {
   clearTimeout(guide.pillTimer);
@@ -1492,9 +1511,10 @@ function endShopByTip() {
 function guideOnScroll() {
   if (!guide.step || guide.step >= 4) return;
   if (guide.step === 1) {
-    if (window.scrollY > 30) hidePill();
+    if (window.scrollY > 90) hidePill(); else placePill();
     const r = $('.toolbar')?.getBoundingClientRect();
     if (r && r.top >= 0 && r.top < window.innerHeight * 0.75) showFilterTip();
+    else if (r && r.bottom < -40) { hidePill(); guide.step = 4; }       // flew past Search: the visitor is browsing
   } else if (guide.step === 2) {
     const r = $('.toolbar').getBoundingClientRect();
     if (r.bottom < -40) endFilterTip(false);                 // scrolled well past it: the visitor is browsing
