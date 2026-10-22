@@ -640,6 +640,43 @@ body::after { top: 60px; left: 0; width: min(340px, 85vw); height: 380px; backgr
   .grid { gap: 14px; }
 }
 
+/* Shop by row: ‹ › scroll buttons (phones) */
+.qrow { position: relative; }
+.qrow .qchips { scroll-padding-inline: 16px 52px; padding-right: 52px; }
+.qnav { position: absolute; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 1px solid var(--lilac-200); border-radius: 50%; background: rgba(255, 255, 255, .94); color: var(--purple-deep); box-shadow: 0 2px 8px rgba(114, 86, 201, .16); z-index: 2; transition: opacity .15s; }
+.qnav .icon { width: 18px; height: 18px; stroke-width: 2.2; }
+.qnav--next { right: -6px; box-shadow: 0 2px 8px rgba(114, 86, 201, .16), -14px 0 14px 4px rgba(248, 244, 251, .92); }   /* soft fade over the chip behind */
+.qnav--prev { left: -6px; box-shadow: 0 2px 8px rgba(114, 86, 201, .16), 14px 0 14px 4px rgba(248, 244, 251, .92); }
+.qnav:active { transform: translateY(-50%) scale(.94); }
+.qnav[hidden] { display: none; }
+
+/* First-visit guide */
+.tip { position: relative; margin-top: 10px; padding: 10px 12px 10px 14px; border: 1px solid var(--lilac-200); border-radius: 16px; background: #fff; box-shadow: 0 4px 14px rgba(114, 86, 201, .12); font-size: 13.5px; line-height: 1.4; color: var(--ink); animation: tip-in .25s ease-out both; }
+.tip::before { content: ''; position: absolute; top: -6px; width: 10px; height: 10px; background: #fff; border-left: 1px solid var(--lilac-200); border-top: 1px solid var(--lilac-200); transform: rotate(45deg); }
+@keyframes tip-in { from { opacity: 0; transform: translateY(-4px); } }
+.tip--filter { display: flex; align-items: center; gap: 10px; margin-left: auto; width: fit-content; max-width: 100%; }
+.tip--filter[hidden], .tip--shopby[hidden] { display: none; }
+.tip--filter::before { right: 40px; }
+.tip--filter p { flex: 1; min-width: 0; }
+.tip__ok { flex: none; min-height: 32px; padding: 0 14px; border: 0; border-radius: 999px; background: var(--lilac-100); color: var(--purple-deep); font-weight: 700; font-size: 13px; }
+.tip--shopby::before { left: 34px; }
+.tip__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.tip__title { font-family: var(--font-display); font-weight: 600; font-size: 14.5px; color: var(--purple-deep); }
+.tip__x { display: grid; place-items: center; width: 30px; height: 30px; margin: -4px -4px -4px 0; padding: 0; border: 0; border-radius: 50%; background: var(--lilac-50); color: var(--ink-2); }
+.tip__x .icon { width: 16px; height: 16px; }
+.tip__list { display: grid; gap: 6px; margin: 8px 0 2px; padding: 0; list-style: none; }
+.tip__list li { display: flex; align-items: center; gap: 10px; }
+.tip__list b { font-weight: 700; }
+.tip__ic { display: grid; place-items: center; width: 26px; height: 26px; flex: none; border-radius: 9px; background: var(--tile-bg); color: var(--tile-ink); }
+.tip__ic .icon { width: 15px; height: 15px; }
+
+.scroll-pill { position: fixed; left: 50%; bottom: calc(18px + var(--safe-b)); z-index: 14; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 16px; border: 1px solid var(--lilac-200); border-radius: 999px; background: rgba(255, 255, 255, .96); color: var(--purple-deep); font-weight: 700; font-size: 13.5px; box-shadow: 0 6px 20px rgba(114, 86, 201, .2); transform: translate(-50%, 12px); opacity: 0; transition: transform .25s, opacity .25s; }
+.scroll-pill.is-in { transform: translate(-50%, 0); opacity: 1; }
+.scroll-pill[hidden] { display: none; }
+.scroll-pill .icon { width: 18px; height: 18px; animation: pill-nudge 1.4s ease-in-out infinite; }
+@keyframes pill-nudge { 50% { transform: translateY(3px); } }
+@media (min-width: 960px) { .tip, .scroll-pill, .qnav { display: none !important; } }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
@@ -771,7 +808,8 @@ const ICONS = {
   blocks: '<rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/><rect x="8.5" y="4" width="7" height="7" rx="1.5"/>',
   pencil: '<path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="m14 7 3 3"/>',
   cap: '<path d="m2 9 10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5M22 9v5"/>',
-  play: '<path d="M8 5.5v13l11-6.5z"/>'
+  play: '<path d="M8 5.5v13l11-6.5z"/>',
+  down: '<path d="m6 9 6 6 6-6"/>'
 };
 function icon(name) {
   return `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ''}</svg>`;
@@ -1126,10 +1164,28 @@ function renderPage() {
           ${cartButton('only-desktop')}
         </div>
         <p class="filter-help only-mobile">Tapis ikut kategori &amp; umur</p>
+        <!-- first visit only (phones): step 2 of the guide -->
+        <div class="tip tip--filter only-mobile" id="tip-filter" role="note" hidden>
+          <p>Tekan <b>Filter</b> untuk pilih kategori &amp; umur anak.</p>
+          <button type="button" class="tip__ok" data-action="tip-ok">Faham</button>
+        </div>
         <!-- phones / tablets only: product type + Shop by stay on the page (on desktop they are in the sidebar) -->
         <div class="types m-types only-mobile" id="type-tabs-m" role="group" aria-label="Product type"></div>
-        <div class="qchips only-mobile" id="curated-chips" role="group" aria-label="Shop by"></div>
+        <div class="qrow only-mobile">
+          <div class="qchips" id="curated-chips" role="group" aria-label="Shop by"></div>
+          <button type="button" class="qnav qnav--prev" id="qnav-prev" data-action="qnav" data-dir="-1" aria-label="Scroll pilihan ke kiri" hidden>${icon('left')}</button>
+          <button type="button" class="qnav qnav--next" id="qnav-next" data-action="qnav" data-dir="1" aria-label="Scroll pilihan ke kanan" hidden>${icon('right')}</button>
+        </div>
+        <!-- first visit only (phones): step 3 of the guide -->
+        <div class="tip tip--shopby only-mobile" id="tip-shopby" role="note" hidden>
+          <div class="tip__head"><p class="tip__title">Pilih ikut keperluan anda</p>
+            <button type="button" class="tip__x" data-action="tip-close" aria-label="Tutup panduan">${icon('x')}</button></div>
+          <ul class="tip__list">
+            ${SHOP_BY_HELP.map(([key, label, text], i) => `<li><span class="tip__ic tone-${[4, 0, 2, 3][i]}" aria-hidden="true">${icon(CURATED.find(c => c[0] === key)[3])}</span><span><b>${label}</b> — ${text}</span></li>`).join('')}
+          </ul>
+        </div>
         <div class="chips" id="active-filters" aria-label="Active filters"></div>
+        <button type="button" class="scroll-pill" id="scroll-pill" data-action="pill-go" hidden>Scroll untuk lihat produk ${icon('down')}</button>
         <div id="catalog"></div>
         <p class="footer">© ${new Date().getFullYear()} ${esc(name)}</p>
       </div>
@@ -1137,6 +1193,9 @@ function renderPage() {
   renderCatalog();
   renderCartBadges();
   fitStoreNames();
+  $('#curated-chips').addEventListener('scroll', syncShopByNav, { passive: true });
+  syncShopByNav();
+  startFirstVisitGuide();
 }
 /* The store name stays on ONE line: if it does not fit, its font gets a little smaller
    (down to 15px). Only a name that still does not fit then ends with "…". */
@@ -1267,7 +1326,7 @@ function renderCatalog() {
   // tapping the chip that is on again switches it off = All Products.
   $('#curated-chips').innerHTML = CURATED.slice(1).map(([key, label, test, ic], i) => {
     const on = curated[0] === key;
-    return `<button class="qchip ${on ? 'is-active' : ''}" data-action="curated" data-group="${on ? 'all' : key}" data-k="qchip:${key}" aria-pressed="${on}">
+    return `<button class="qchip ${on ? 'is-active' : ''}" data-action="curated" data-group="${on ? 'all' : key}" data-k="qchip:${key}" aria-pressed="${on}" title="${esc(SHOP_BY_MEANING[key] || '')}">
       <span class="tone-${[4, 0, 2, 3][i]}" aria-hidden="true">${icon(ic)}</span>${label} <span class="qchip__n num">${all.filter(test).length}</span></button>`;
   }).join('');
   const inGroup = all.filter(curated[2]);
@@ -1352,7 +1411,99 @@ function renderCatalog() {
     <div class="grid">${grid}</div>`;
 
   if (focusKey) $$('#app [data-k]').find(el => el.dataset.k === focusKey)?.focus();
+  syncShopByNav();
 }
+
+/* ----- Shop by: meanings + the ‹ › buttons of the sideways row (phones) ----- */
+const SHOP_BY_MEANING = {
+  main: 'Produk utama NPrecious.',
+  popular: 'Terhangat & paling laris.',
+  best: 'Produk yang paling berbaloi dimiliki.',
+  free: 'Dapatkan akses percuma untuk produk terpilih kami.'
+};
+const SHOP_BY_HELP = [
+  ['main', 'Main Product', 'Produk utama NPrecious'],
+  ['popular', 'Popular', 'Terhangat &amp; paling laris'],
+  ['best', 'Best Value', 'Paling berbaloi dimiliki'],
+  ['free', 'FREE', 'Akses percuma produk terpilih']
+];
+/* › shows while there is more of the row to the right; ‹ once the row has moved right. */
+function syncShopByNav() {
+  const row = $('#curated-chips'), next = $('#qnav-next'), prev = $('#qnav-prev');
+  if (!row || !next || !prev) return;
+  const max = row.scrollWidth - row.clientWidth;
+  next.hidden = !(max > 4 && row.scrollLeft < max - 4);
+  prev.hidden = !(max > 4 && row.scrollLeft > 4);
+}
+function scrollShopBy(dir) {
+  const row = $('#curated-chips');
+  if (!row) return;
+  // Only the row moves (never the page) and nothing is selected.
+  row.scrollBy({ left: dir * Math.max(120, row.clientWidth * 0.6), behavior: REDUCED_MOTION.matches ? 'auto' : 'smooth' });
+}
+window.addEventListener('resize', () => syncShopByNav());
+
+/* ----- First-visit guide (phones only, once) -----
+   1. a small "Scroll untuk lihat produk" pill at the bottom, until the visitor scrolls
+   2. when Search + Filter come into view: a tip under Filter ("Faham" / tap Filter)
+   3. then a short Shop by guide under the chips (tap a chip, ✕, or scroll on)
+   Nothing is ever blocked or opened for the visitor; the filter drawer only opens on
+   a tap on Filter. Only a small "seen" mark is kept in this browser (localStorage). */
+const GUIDE_KEY = 'np_guide_seen';
+const guide = { step: 0, shopbyAt: 0 };
+function startFirstVisitGuide() {
+  if (DESKTOP.matches || readStore(GUIDE_KEY, false) || deepLinkSlug()) return;
+  writeStore(GUIDE_KEY, true);                               // first visit: shown this once only
+  guide.step = 1;
+  const bar = $('.toolbar');
+  if (bar.getBoundingClientRect().top < window.innerHeight * 0.75) return showFilterTip();   // already in view
+  const pill = $('#scroll-pill');
+  pill.hidden = false;
+  requestAnimationFrame(() => pill.classList.add('is-in'));
+  guide.pillTimer = setTimeout(hidePill, 6000);
+}
+function hidePill() {
+  clearTimeout(guide.pillTimer);
+  const pill = $('#scroll-pill');
+  if (pill && !pill.hidden) { pill.classList.remove('is-in'); setTimeout(() => { pill.hidden = true; }, 250); }
+}
+function showFilterTip() {
+  hidePill();
+  if (guide.step >= 2) return;
+  guide.step = 2;
+  $('#tip-filter').hidden = false;
+}
+function endFilterTip(next) {
+  if (guide.step !== 2) return;
+  $('#tip-filter').hidden = true;
+  guide.step = next ? 3 : 4;
+  if (next) showShopByTip();
+}
+function showShopByTip() {
+  if (DESKTOP.matches) return;
+  $('#tip-shopby').hidden = false;
+  guide.shopbyAt = window.scrollY;
+}
+function endShopByTip() {
+  if (guide.step !== 3) return;
+  guide.step = 4;
+  $('#tip-shopby').hidden = true;
+}
+function guideOnScroll() {
+  if (!guide.step || guide.step >= 4) return;
+  if (guide.step === 1) {
+    if (window.scrollY > 30) hidePill();
+    const r = $('.toolbar')?.getBoundingClientRect();
+    if (r && r.top >= 0 && r.top < window.innerHeight * 0.75) showFilterTip();
+  } else if (guide.step === 2) {
+    const r = $('.toolbar').getBoundingClientRect();
+    if (r.bottom < -40) endFilterTip(false);                 // scrolled well past it: the visitor is browsing
+  } else if (guide.step === 3) {
+    if (window.scrollY - guide.shopbyAt > 160) endShopByTip();
+  }
+}
+window.addEventListener('scroll', guideOnScroll, { passive: true });
+
 /* Filter drawer (phones and tablets; on desktop the sidebar is always shown). */
 const DESKTOP = window.matchMedia('(min-width: 960px)');
 function openFilters() {
@@ -1365,6 +1516,7 @@ function openFilters() {
 function closeFilters() {
   const shop = $('#shop');
   if (!shop || !shop.classList.contains('is-filtering')) return;
+  if (guide.step === 2.5) { guide.step = 3; setTimeout(showShopByTip, 320); }
   const hadFocus = shop.querySelector('#filters').contains(document.activeElement);
   shop.classList.remove('is-filtering');
   document.body.classList.remove('is-filtering');
@@ -2204,14 +2356,21 @@ window.addEventListener('afterprint', () => { $('#print-root').innerHTML = ''; }
 const actions = {
   'close-sheet': el => closeSheet(el.closest('.sheet')),
   'reload': () => start(),
-  'curated': el => { state.filter.group = el.dataset.group; renderCatalog(); },
+  'curated': el => { endShopByTip(); state.filter.group = el.dataset.group; renderCatalog(); },
   'type': el => { state.filter.type = el.dataset.type; renderCatalog(); },
   'category': el => { state.filter.category = el.dataset.id; renderCatalog(); },
   'stage': el => { state.filter.stage = el.dataset.stage; renderCatalog(); },
   'clear-one': el => { state.filter[el.dataset.key] = 'all'; renderCatalog(); $('#search').focus({ preventScroll: true }); },
   'clear-filter': () => { state.filter = { group: 'all', type: 'all', category: 'all', stage: 'all', q: '' }; $('#search').value = ''; renderCatalog(); },
   'clear-drawer': () => { state.filter.category = 'all'; state.filter.stage = 'all'; renderCatalog(); },
-  'open-filters': () => openFilters(),
+  'open-filters': () => {
+    if (guide.step === 2) { $('#tip-filter').hidden = true; guide.step = 2.5; }   // guide: Shop by tip comes after the drawer
+    openFilters();
+  },
+  'tip-ok': () => endFilterTip(true),
+  'tip-close': () => endShopByTip(),
+  'pill-go': () => { hidePill(); goHome(); },
+  'qnav': el => scrollShopBy(Number(el.dataset.dir)),
   'close-filters': () => closeFilters(),
   'go-home': () => goHome(),
   'open-product': el => openProduct(el.dataset.id),
