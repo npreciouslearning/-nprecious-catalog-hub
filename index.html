@@ -691,6 +691,57 @@ body::after { top: 60px; left: 0; width: min(340px, 85vw); height: 380px; backgr
 @media (prefers-reduced-motion: reduce) { .scroll-pill.is-in, .scroll-pill__sub .icon { animation: none !important; transform: translateX(-50%); } .scroll-pill__sub .icon { transform: none; } }
 @media (min-width: 960px) { .tip, .scroll-pill, .qnav { display: none !important; } }
 
+/* Learning Shelves — the unfiltered catalog shown as shelves that open and close */
+.shelfbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 22px 0 12px; }
+.shelfbar__label { margin: 0; font-size: 14px; color: var(--ink-2); }
+.shelfbar__label b { color: var(--purple-deep); font-weight: 700; }
+.shelfbar__pick { position: relative; }
+.shelfbar__btn { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border: 1.5px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); font: 600 13.5px var(--font-body); cursor: pointer; }
+.shelfbar__btn .icon { width: 16px; height: 16px; }
+.shelfbar__btn[aria-expanded="true"] .icon:last-child { transform: rotate(180deg); }
+.shelfmenu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 12; display: grid; gap: 2px; width: min(280px, calc(100vw - 32px)); max-height: 60vh; overflow: auto; padding: 8px; border-radius: 18px; background: var(--surface); box-shadow: var(--shadow-2); }
+.shelfmenu[hidden] { display: none; }
+.shelfmenu__item { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-height: 44px; padding: 0 12px; border: 0; border-radius: 12px; background: none; color: var(--ink); font: 600 14px var(--font-body); text-align: left; cursor: pointer; }
+.shelfmenu__item.is-active { background: var(--lilac-50); color: var(--purple-deep); }
+.shelfmenu__n { flex: none; padding: 2px 8px; border-radius: 999px; background: var(--bg); color: var(--ink-2); font-size: 12px; font-weight: 700; }
+.shelves { display: grid; gap: 12px; }
+.shelf { --sh-bg: var(--lilac-50); --sh-ink: var(--purple-deep); --sh-ledge: var(--lilac-200); border-radius: 24px; }
+.shelf--blush { --sh-bg: var(--blush-50); --sh-ink: var(--blush-ink); --sh-ledge: var(--blush-100); }
+.shelf--cream { --sh-bg: var(--cream-50); --sh-ink: var(--amber-ink); --sh-ledge: var(--cream-100); }
+.shelf--mint  { --sh-bg: var(--mint-50); --sh-ink: var(--mint-ink); --sh-ledge: var(--mint-100); }
+.shelf__head { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border: 0; border-radius: 18px; background: var(--surface); box-shadow: var(--shadow-1); color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.shelf__thumb { display: grid; place-items: center; width: 48px; height: 48px; flex: none; border-radius: 14px; background: var(--sh-bg); color: var(--sh-ink); }
+.shelf__thumb .icon { width: 22px; height: 22px; }
+.shelf__txt { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.shelf__eyebrow { display: none; font-size: 10.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--sh-ink); }
+.shelf__title { font-family: var(--font-display); font-weight: 600; font-size: 16.5px; line-height: 1.15; }
+.shelf__sub { font-size: 12.5px; font-weight: 600; line-height: 1.3; color: var(--sh-ink); }
+.shelf__n { flex: none; font-size: 12.5px; font-weight: 700; color: var(--ink-2); }
+.shelf__chev { display: grid; place-items: center; width: 30px; height: 30px; flex: none; border-radius: 50%; background: var(--sh-ink); color: #fff; transition: transform .2s; }
+.shelf__chev .icon { width: 16px; height: 16px; stroke-width: 2.6; }
+.shelf.is-open { padding: 14px 12px; background: var(--sh-bg); }
+.shelf.is-open .shelf__head { align-items: flex-start; padding: 0 4px; background: none; box-shadow: none; }
+.shelf.is-open .shelf__thumb { display: none; }
+.shelf.is-open .shelf__eyebrow { display: block; }
+.shelf.is-open .shelf__title { margin: 2px 0; font-size: 22px; }
+.shelf.is-open .shelf__sub { font-weight: 500; color: var(--ink-2); }
+.shelf.is-open .shelf__n { display: none; }
+.shelf.is-open .shelf__chev { transform: rotate(180deg); }
+.shelf__body { display: grid; gap: 14px; margin-top: 14px; }
+.shelf__ledge { height: 8px; margin: 0 4px; border-radius: 999px; background: var(--sh-ledge); }
+.shelf__more { display: flex; align-items: center; justify-content: center; gap: 4px; min-height: 44px; border: 0; border-radius: 14px; background: var(--surface); color: var(--sh-ink); font: 800 13.5px var(--font-body); cursor: pointer; }
+.shelf__more .icon { width: 16px; height: 16px; }
+.shelf-all { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; min-height: 50px; margin-top: 16px; border: 0; border-radius: 16px; background: var(--purple); color: #fff; font: 700 15px var(--font-body); cursor: pointer; }
+.shelf-all .icon { width: 18px; height: 18px; }
+/* Where the grid has 3 columns, a shelf shows 3 products so its row is never half empty. */
+@media (min-width: 640px) and (max-width: 1279.98px) { .shelf:not(.shelf--all) .grid > .pcard:nth-child(n+4) { display: none; } }
+@media (min-width: 960px) {
+  .shelves { gap: 14px; }
+  .shelf.is-open { padding: 20px; }
+  .shelf.is-open .shelf__title { font-size: 26px; }
+  .shelf-all { width: auto; margin-inline: auto; padding: 0 32px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
@@ -918,6 +969,9 @@ const state = {
   // group: curated filter ('all' | 'main' | 'popular' | 'best' | 'free');  type: 'all' | 'physical' | 'digital'
   // stage: 'all' or a key of STAGES (age / school level)
   filter: { group: 'all', type: 'all', category: 'all', stage: 'all', q: '' },
+  view: 'shelves',                            // 'shelves' | 'grid' — how the unfiltered catalog is shown
+  shelfOpen: null,                            // Set of open shelf keys (this visit only)
+  shelfList: [],
   detail: { id: null, qty: 1, index: 0 },
   lookup: null,                               // My Orders: { number, phone, order } of the order on screen
   receiptBusy: false,
@@ -1420,14 +1474,142 @@ function renderCatalog() {
     grid = `<div class="empty">${icon('search')}<strong>Nothing matches</strong><span>Try another word, type, category or age.</span><br>
               <button class="btn btn--ghost btn--sm" data-action="clear-filter">Show all products</button></div>`;
   }
-  $('#catalog').innerHTML = `
-    ${featured.length ? `<h2 class="section-title"><span class="section-title__t">Featured Products</span></h2><div class="rail">${featured.map(productCard).join('')}</div>` : ''}
+  // Learning Shelves: only a different way of SHOWING the same list. They appear while
+  // nothing narrows the list (no Shop by, category, age or search); the type tab still
+  // applies. Any filter -> the normal grid below, exactly as before.
+  const shelvesOk = browsing && curated[0] === 'all' && ofType.length > 0;
+  const featuredHtml = featured.length ? `<h2 class="section-title"><span class="section-title__t">Featured Products</span></h2><div class="rail">${featured.map(productCard).join('')}</div>` : '';
+  if (shelvesOk && state.view !== 'grid') {
+    $('#catalog').innerHTML = featuredHtml + shelvesHtml(ofType);
+  } else {
+    $('#catalog').innerHTML = `
+    ${featuredHtml}
+    ${shelvesOk ? `<div class="shelfbar"><p class="shelfbar__label">Paparan: <b>Semua produk</b></p>
+      <button type="button" class="shelfbar__btn" data-action="view-shelves" data-k="view:shelves">${icon('layers')}<span>Lihat ikut rak</span></button></div>` : ''}
     <h2 class="section-title"><span class="section-title__t">${esc(heading)}</span> <small>${list.length} item${list.length === 1 ? '' : 's'}</small></h2>
     <div class="grid">${grid}</div>`;
+  }
 
   if (focusKey) $$('#app [data-k]').find(el => el.dataset.k === focusKey)?.focus();
   syncShopByNav();
 }
+
+/* ----- Learning Shelves -----
+   The products the type tab allows, grouped into shelves: Main Product first, then one
+   shelf per category (the seller's category order), a FREE shelf last. Each shelf shows
+   its first products in the normal catalog order; "Lihat semua" just switches on the
+   existing filter for that shelf (Shop by / category). Nothing is saved anywhere. */
+const SHELF_TONES = ['lilac', 'blush', 'cream'];
+const SHELF_PREVIEW = 4;
+const isFreeName = name => /\bfree\b|percuma/i.test(String(name || ''));
+function shelfTagline(name) {
+  const n = String(name || '').toLowerCase();
+  const rules = [[/app/, 'Belajar interaktif, lebih seronok'], [/worksheet|latihan|nota/, 'Latihan dan ulang kaji lebih mudah'],
+    [/bundle|pakej|package/, 'Lebih lengkap, lebih berbaloi'], [/bengkel|workshop|kelas|class/, 'Belajar langkah demi langkah'],
+    [/combo/, 'Gabungan pilihan, lebih jimat'], [/story|buku|cerita/, 'Kisah seronok untuk dibaca bersama'],
+    [/art|warna|colou?r/, 'Aktiviti seni dan kreatif'], [/reseller|agent|ejen/, 'Untuk ejen dan reseller']];
+  const hit = rules.find(([re]) => re.test(n));
+  return hit ? hit[1] : 'Koleksi pilihan NPrecious';
+}
+function buildShelves(ofType) {
+  const shelves = [];
+  const main = ofType.filter(p => p.is_main_product === true);
+  if (main.length) shelves.push({ key: 'main', group: 'main', eyebrow: 'Pilihan NPrecious', title: 'Main Product',
+    sub: 'Produk utama NPrecious', iconName: 'crown', tone: 'cream', items: main });
+  const cats = state.categories.map(c => ({ c, items: ofType.filter(p => p.category_id === c.id) })).filter(x => x.items.length);
+  cats.filter(x => !isFreeName(x.c.name)).forEach((x, i) => shelves.push({ key: 'cat:' + x.c.id, category: x.c.id,
+    eyebrow: 'Rak ' + x.c.name, title: x.c.name, sub: shelfTagline(x.c.name), iconName: categoryIcon(x.c.name),
+    tone: SHELF_TONES[i % SHELF_TONES.length], items: x.items }));
+  const known = new Set(state.categories.map(c => c.id));
+  const loose = ofType.filter(p => !p.category_id || !known.has(p.category_id));
+  if (loose.length) shelves.push({ key: 'other', eyebrow: 'Rak lain', title: 'Lain-lain', sub: 'Produk lain di kedai ini',
+    iconName: 'grid', tone: 'lilac', items: loose, showAll: true });
+  const freeCats = cats.filter(x => isFreeName(x.c.name));
+  freeCats.forEach(x => shelves.push({ key: 'cat:' + x.c.id, category: x.c.id, eyebrow: 'Rak percuma', title: x.c.name,
+    sub: 'Produk terpilih untuk akses percuma', iconName: 'gift', tone: 'mint', items: x.items }));
+  if (!freeCats.length) {
+    const free = ofType.filter(p => p.is_free === true);
+    if (free.length) shelves.push({ key: 'free', group: 'free', eyebrow: 'Rak percuma', title: 'FREE',
+      sub: 'Produk terpilih untuk akses percuma', iconName: 'gift', tone: 'mint', items: free });
+  }
+  return shelves;
+}
+function shelvesHtml(ofType) {
+  const shelves = buildShelves(ofType);
+  state.shelfList = shelves;
+  if (!state.shelfOpen) state.shelfOpen = new Set(shelves[0] ? [shelves[0].key] : []);   // first shelf open on arrival
+  const menu = `<div class="shelfmenu" id="shelf-menu" hidden>
+      <button type="button" class="shelfmenu__item is-active" data-action="shelf-pick" data-key="all"><span>Semua rak</span><span class="shelfmenu__n num">${ofType.length}</span></button>
+      ${shelves.map(s => `<button type="button" class="shelfmenu__item" data-action="shelf-pick" data-key="${esc(s.key)}"><span>${esc(s.title)}</span><span class="shelfmenu__n num">${s.items.length}</span></button>`).join('')}
+    </div>`;
+  const shelf = (s, i) => {
+    const open = state.shelfOpen.has(s.key);
+    const n = s.items.length;
+    const shown = s.showAll ? s.items : s.items.slice(0, SHELF_PREVIEW);
+    const more = !s.showAll && n > SHELF_PREVIEW - 1
+      ? `<button type="button" class="shelf__more" data-action="shelf-all" data-key="${esc(s.key)}">Lihat semua ${esc(s.title)} (${n}) ${icon('right')}</button>` : '';
+    return `<section class="shelf shelf--${s.tone} ${s.showAll ? 'shelf--all' : ''} ${open ? 'is-open' : ''}" id="shelf-${i}" aria-label="${esc(s.title)}">
+      <button type="button" class="shelf__head" data-action="shelf-toggle" data-key="${esc(s.key)}" data-k="shelf:${esc(s.key)}"
+          aria-expanded="${open}" ${open ? `aria-controls="shelf-body-${i}"` : ''}>
+        <span class="shelf__thumb" aria-hidden="true">${icon(s.iconName)}</span>
+        <span class="shelf__txt">
+          <span class="shelf__eyebrow">${esc(s.eyebrow)}</span>
+          <span class="shelf__title">${esc(s.title)}</span>
+          <span class="shelf__sub">${esc(s.sub)}</span>
+        </span>
+        <span class="shelf__n num" aria-label="${n} product${n === 1 ? '' : 's'}">${n}</span>
+        <span class="shelf__chev" aria-hidden="true">${icon('down')}</span>
+      </button>
+      ${open ? `<div class="shelf__body" id="shelf-body-${i}">
+        <div class="grid">${shown.map(productCard).join('')}</div>
+        <div class="shelf__ledge" aria-hidden="true"></div>
+        ${more}
+      </div>` : ''}
+    </section>`;
+  };
+  return `<div class="shelfbar">
+      <p class="shelfbar__label">Paparan: <b>Semua rak</b></p>
+      <div class="shelfbar__pick">
+        <button type="button" class="shelfbar__btn" data-action="shelf-menu" data-k="shelf-menu" aria-expanded="false" aria-controls="shelf-menu">${icon('filter')}<span>Pilih rak</span>${icon('down')}</button>
+        ${menu}
+      </div>
+    </div>
+    <div class="shelves">${shelves.map(shelf).join('')}</div>
+    <button type="button" class="shelf-all" data-action="view-grid" data-k="view:grid">Lihat semua ${ofType.length} produk ${icon('right')}</button>`;
+}
+/* Scroll so the top of the product area (active chips + heading) is in view. */
+function scrollToCatalog() {
+  const el = $('#active-filters') || $('#catalog');
+  if (!el) return;
+  const top = Math.max(0, el.getBoundingClientRect().top + window.scrollY - 12);
+  window.scrollTo({ top, behavior: REDUCED_MOTION.matches ? 'auto' : 'smooth' });
+}
+/* "Lihat semua" on a shelf = the filter that already exists for it. */
+function openShelfFilter(key) {
+  const s = (state.shelfList || []).find(x => x.key === key);
+  if (!s) return;
+  if (s.group) state.filter.group = s.group;
+  else if (s.category) state.filter.category = s.category;
+  else {                                                     // "Lain-lain" has no filter: just open it
+    state.shelfOpen = new Set([key]);
+    renderCatalog();
+    const i = state.shelfList.findIndex(x => x.key === key);
+    $('#shelf-' + i)?.scrollIntoView({ behavior: REDUCED_MOTION.matches ? 'auto' : 'smooth', block: 'start' });
+    return;
+  }
+  renderCatalog();
+  scrollToCatalog();
+}
+function closeShelfMenu() {
+  const menu = $('#shelf-menu');
+  if (!menu || menu.hidden) return;
+  menu.hidden = true;
+  $('[data-action="shelf-menu"]')?.setAttribute('aria-expanded', 'false');
+}
+document.addEventListener('click', event => {
+  if (!event.target.closest('.shelfbar__pick')) closeShelfMenu();
+});
+document.addEventListener('keydown', event => { if (event.key === 'Escape') closeShelfMenu(); });
 
 /* ----- Shop by: meanings + the ‹ › buttons of the sideways row (phones) ----- */
 const SHOP_BY_MEANING = {
@@ -2388,7 +2570,21 @@ const actions = {
   'category': el => { state.filter.category = el.dataset.id; renderCatalog(); },
   'stage': el => { state.filter.stage = el.dataset.stage; renderCatalog(); },
   'clear-one': el => { state.filter[el.dataset.key] = 'all'; renderCatalog(); $('#search').focus({ preventScroll: true }); },
-  'clear-filter': () => { state.filter = { group: 'all', type: 'all', category: 'all', stage: 'all', q: '' }; $('#search').value = ''; renderCatalog(); },
+  'clear-filter': () => { state.filter = { group: 'all', type: 'all', category: 'all', stage: 'all', q: '' }; state.view = 'shelves'; $('#search').value = ''; renderCatalog(); },
+  'shelf-toggle': el => {
+    const key = el.dataset.key;
+    if (state.shelfOpen.has(key)) state.shelfOpen.delete(key); else state.shelfOpen.add(key);
+    renderCatalog();
+  },
+  'shelf-all': el => openShelfFilter(el.dataset.key),
+  'shelf-menu': el => {
+    const menu = $('#shelf-menu');
+    menu.hidden = !menu.hidden;
+    el.setAttribute('aria-expanded', String(!menu.hidden));
+  },
+  'shelf-pick': el => { closeShelfMenu(); if (el.dataset.key !== 'all') openShelfFilter(el.dataset.key); },
+  'view-grid': () => { state.view = 'grid'; renderCatalog(); scrollToCatalog(); },
+  'view-shelves': () => { state.view = 'shelves'; renderCatalog(); scrollToCatalog(); },
   'clear-drawer': () => { state.filter.category = 'all'; state.filter.stage = 'all'; renderCatalog(); },
   'open-filters': () => {
     if (guide.step === 2) { $('#tip-filter').hidden = true; guide.step = 2.5; }   // guide: Shop by tip comes after the drawer
